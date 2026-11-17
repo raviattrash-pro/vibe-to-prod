@@ -1,0 +1,29 @@
+{
+  "name": "agencyos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A provider-independent engineering workflow engine with an observability studio.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test",
+    "sync:skills": "node scripts/sync-skills.js",
+    "install:project": "node scripts/install-project.js",
+    "generate:pwa-icons": "node scripts/generate-pwa-icons.js",
+    "validate": "node scripts/validate-project.js",
+    "import:postgres": "node scripts/import-json-to-postgres.js",
+    "package:release": "node scripts/package-release.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  },
+  "files": [
+    "src/**", "public/**", "agents/**", "skills/**", ".agents/skills/**", ".claude/skills/**",
+    "references/**", "migrations/**", "scripts/**", "docs/**", "README.md", "AGENTS.md", "CLAUDE.md", "SKILL.md",
+    "Dockerfile", ".dockerignore", "compose.yaml", ".env.example"
+  ]
+}

@@ -1,0 +1,35 @@
+name: Signed release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run sync:skills
+      - run: npm run validate
+      - run: git diff --exit-code -- .agents/skills .claude/skills
+      - run: npm run package:release
+      - uses: sigstore/cosign-installer@v4.0.0
+      - name: Sign release artifacts with GitHub OIDC
+        run: |
+          for file in release/*.tgz release/*.sha256 release/release-manifest.json; do
+            cosign sign-blob "$file" --bundle "$file.sigstore.json" --yes
+          done
+      - name: Publish signed artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" release/* --generate-notes

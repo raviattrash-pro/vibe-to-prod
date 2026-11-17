@@ -1,0 +1,419 @@
+[
+  {
+    "id": "agencyos",
+    "name": "AgencyOS Product Workflow",
+    "description": "Build and evolve AgencyOS, an agent ecosystem that improves coding agents with modular skills and evidence-based engineering, paired with AgencyOS Studio for project management and visibility.",
+    "activation": "When building, extending, auditing, or releasing the AgencyOS product",
+    "inputs": ["repository state", "product requirements", "available checks"],
+    "outputs": ["phase plan", "implemented features", "evidence-backed handoff"],
+    "validation": ["Core before Studio polish", "claims tied to evidence", "limitations explicit"]
+  },
+  {
+    "id": "repository-audit",
+    "name": "Repository Audit",
+    "description": "Audit a repository's structure, stack, scripts, dependencies, and existing architecture before making changes. Establishes a verified baseline of what exists, what works, and what constraints apply.",
+    "purpose": "Produce a verified snapshot of the repository's technology stack, existing commands, dependency health, file organisation, and architectural constraints so that subsequent skills operate from facts rather than assumptions.",
+    "activation": "At the start of repository work, or when the current state of the codebase is unknown or unclear",
+    "inputs": ["repository tree", "local instructions", "package manifests", "CI/CD configuration"],
+    "outputs": ["stack summary", "constraints", "baseline", "dependency health report", "available commands"],
+    "procedure": [
+      "List the repository tree and identify the primary language, framework, and package manager from manifests (package.json, requirements.txt, go.mod, Cargo.toml, etc.).",
+      "Read local instruction files (README, CONTRIBUTING, AGENTS.md, CLAUDE.md, GEMINI.md) and extract project conventions, required tooling, and environment prerequisites.",
+      "Discover available scripts and commands (npm scripts, Makefile targets, CI workflows) and record which ones exist without running destructive commands.",
+      "Run safe, read-only checks: dependency audit (npm audit --audit-level=moderate, pip-audit, cargo audit), lockfile presence, and .env.example vs actual environment.",
+      "Identify existing test suites, linters, and formatters; record their configuration and last-known status if CI logs are available.",
+      "Summarise findings as: stack (language, framework, database, deployment), constraints (required Node version, OS, secrets), baseline (working commands, known issues), and dependency health (outdated, vulnerable, missing)."
+    ],
+    "avoid": [
+      "Running build, deploy, migration, or seed commands during the audit phase.",
+      "Replacing existing project structure or renaming files before understanding their purpose.",
+      "Assuming a framework or tool is absent because its config file is not in the root directory.",
+      "Reporting dependency counts or audit results without actually running the check."
+    ],
+    "validation": ["existing work preserved", "commands discovered", "dependency audit executed or marked unverified", "stack summary matches actual manifests"]
+  },
+  {
+    "id": "design-intelligence",
+    "name": "Design Intelligence",
+    "description": "Guide original visual design for user-facing screens: design tokens, typography, color systems, spacing scales, responsive layouts, interaction patterns, and accessibility compliance.",
+    "purpose": "Produce an intentional, original visual design system with tokens, components, responsive behaviour, and accessibility conformance — not a generic template or copied theme.",
+    "activation": "When user-facing screens or visual systems are in scope",
+    "inputs": ["requirements", "audience", "brand references", "existing design tokens or component library", "accessibility requirements (WCAG level)"],
+    "outputs": ["design direction document", "design tokens (colors, typography, spacing, radii, shadows)", "component inventory", "responsive breakpoint strategy", "accessibility audit"],
+    "procedure": [
+      "Inspect the existing codebase for design tokens, CSS variables, theme files, component libraries, and style conventions before proposing a new system.",
+      "Define the visual direction: primary and secondary palette (with WCAG AA contrast ratios verified), type scale (modular or fluid), spacing scale (4px or 8px base), border radii, and shadow levels.",
+      "Document design tokens as CSS custom properties or a JSON token file; ensure tokens cover color, typography (family, weight, size, line-height), spacing, breakpoints, and motion duration.",
+      "Audit existing components for accessibility: semantic HTML, ARIA labels, focus management, keyboard navigation, and colour contrast. Record each finding with its WCAG criterion.",
+      "Define responsive breakpoints and test layout behaviour at mobile (360px), tablet (768px), and desktop (1280px) widths. Record which components reflow, stack, or hide.",
+      "Specify motion and transition defaults; respect prefers-reduced-motion by disabling or reducing animations. Document the motion tokens.",
+      "Produce a component inventory listing each UI component, its variants, states (default, hover, focus, active, disabled, error), and the tokens it consumes."
+    ],
+    "avoid": [
+      "Copying a third-party theme or design kit without verifying its license and attribution requirements.",
+      "Using colour combinations that fail WCAG AA contrast (4.5:1 for normal text, 3:1 for large text) without documenting the exception.",
+      "Defining tokens in multiple competing formats (e.g., both Tailwind config and CSS variables) without a single source of truth.",
+      "Shipping design changes without checking responsive behaviour at declared breakpoints."
+    ],
+    "validation": ["responsive at 360px, 768px, and 1280px", "accessible (WCAG AA contrast verified)", "original (no unlicensed copied themes)", "tokens documented as reusable variables"]
+  },
+  {
+    "id": "hld",
+    "name": "High-Level Design",
+    "description": "Produce a High-Level Design (HLD) covering system boundaries, component responsibilities, data flows, API contracts, infrastructure choices, and architectural trade-offs with an evolution path.",
+    "purpose": "Define the system architecture at a level sufficient for implementation: components, their responsibilities, communication patterns, data flows, and the trade-offs behind each choice.",
+    "activation": "When system boundaries or architecture choices matter, or when a new feature spans multiple components or services",
+    "inputs": ["requirements", "scale expectations", "constraints (budget, team size, timeline)", "existing architecture", "non-functional requirements"],
+    "outputs": ["component diagram (Mermaid)", "data flow diagram", "API contract summaries", "trade-off analysis", "Architecture Decision Records (ADRs)"],
+    "procedure": [
+      "Review existing architecture documentation, code structure, and deployment topology before proposing changes. Identify what already works and must be preserved.",
+      "Define system boundaries: list each component or service, its single responsibility, its inputs and outputs, and its deployment unit.",
+      "Draw a component diagram using Mermaid (flowchart or C4-style) showing components, their dependencies, data stores, and external integrations.",
+      "Map critical data flows end-to-end: request entry, authentication, business logic, data persistence, response. Identify where failures propagate.",
+      "For each significant architecture decision, write an ADR: context, decision, alternatives considered, trade-offs (cost, complexity, latency, team skill), and evolution path.",
+      "Validate that the proposed architecture matches the actual scale: do not introduce microservices, message queues, or distributed caches without evidence of load that requires them.",
+      "Identify integration points that need API contracts (REST, GraphQL, gRPC, events) and document request/response shapes, authentication, error codes, and rate limits."
+    ],
+    "avoid": [
+      "Over-engineering with microservices, event buses, or distributed systems when a monolith or modular monolith meets demonstrated load.",
+      "Proposing architecture without understanding current deployment, infrastructure budget, or team capabilities.",
+      "Drawing diagrams without explaining the rationale behind component boundaries.",
+      "Ignoring the evolution path: every architecture choice should state what changes when scale doubles."
+    ],
+    "validation": ["complexity justified by demonstrated requirements", "evolution path included for each major decision", "diagrams match actual component structure", "ADRs recorded for significant choices"]
+  },
+  {
+    "id": "application-security",
+    "name": "Application Security",
+    "description": "Assess and harden application security: threat modeling, authentication and authorisation review, input validation, secret management, dependency vulnerabilities, security headers, and OWASP Top 10 coverage.",
+    "purpose": "Identify, prioritise, and remediate security vulnerabilities across the application stack using evidence-based checks and established frameworks (OWASP Top 10, CWE).",
+    "activation": "For all applications; deepen for sensitive data, payment processing, or access control systems",
+    "inputs": ["data flows", "auth model", "deployment environment", "dependency manifests", "API surface"],
+    "outputs": ["threat model", "vulnerability findings table (severity, location, impact, remediation)", "security checks executed", "remediation plan"],
+    "procedure": [
+      "Map data flows to identify where sensitive data (credentials, PII, tokens, payment data) enters, is processed, stored, and transmitted. Mark trust boundaries.",
+      "Review authentication: check password hashing (bcrypt/scrypt/argon2 with sufficient rounds), session management (secure/httpOnly/sameSite cookies, token expiry), and MFA availability.",
+      "Review authorisation: verify server-side access control on every protected route and API endpoint. Check for IDOR (insecure direct object reference) patterns where user IDs are passed from the client.",
+      "Scan for secrets in the repository: search for hardcoded API keys, passwords, tokens, and connection strings using pattern matching (regex for common secret formats). Verify .gitignore covers .env files.",
+      "Run dependency vulnerability checks: npm audit (or pip-audit, cargo audit, etc.) and record findings with severity. Check for known CVEs in major dependencies.",
+      "Inspect HTTP security headers: Content-Security-Policy, Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options, Referrer-Policy. Record which are present, missing, or misconfigured.",
+      "Validate input handling: check for SQL/NoSQL injection vectors (parameterised queries vs string concatenation), XSS (output encoding, CSP), CSRF (token or SameSite), and path traversal.",
+      "Document each finding in a table: Severity (P0-Critical, P1-High, P2-Medium, P3-Low), CWE ID, Location (file:line), Impact, and Remediation steps."
+    ],
+    "avoid": [
+      "Claiming an application is secure without running concrete checks.",
+      "Ignoring server-side validation because client-side validation exists.",
+      "Storing or logging secrets, tokens, or credentials in check outputs.",
+      "Treating dependency audit warnings as resolved without verifying the fix.",
+      "Making high-impact security changes (auth flow, encryption, access control) without explicit approval."
+    ],
+    "validation": ["server-side controls verified on protected endpoints", "evidence recorded for each finding", "critical blockers (P0/P1) flagged as release gates", "dependency audit executed or marked unverified"]
+  },
+  {
+    "id": "seo",
+    "name": "SEO and AI Discoverability",
+    "description": "Assess and implement technical SEO: semantic HTML, metadata, Open Graph and Twitter cards, structured data (JSON-LD), sitemap.xml, robots.txt, canonical URLs, crawlability, and Core Web Vitals impact on search.",
+    "purpose": "Ensure public-facing pages are technically discoverable by search engines and AI systems through correct metadata, semantic markup, structured data, and crawl configuration, while protecting private routes from indexing.",
+    "activation": "For every project assessment; implement changes only for relevant public pages",
+    "inputs": ["routes (public vs authenticated)", "content structure", "rendering method (SSR, SSG, CSR, hybrid)", "current meta tags and structured data", "analytics data if available"],
+    "outputs": ["SEO readiness report", "metadata audit", "structured data validation", "sitemap and robots.txt review", "indexing protection verification"],
+    "procedure": [
+      "List all routes and classify them as public (indexable) or private/authenticated (must be excluded from indexing).",
+      "Verify that private/authenticated routes are protected from indexing: check robots.txt disallow rules, meta robots noindex tags, and X-Robots-Tag headers.",
+      "Audit each public page for: unique title tag (50-60 chars), meta description (120-160 chars), canonical URL, Open Graph tags (og:title, og:description, og:image, og:url), and Twitter Card tags.",
+      "Check semantic HTML structure: one h1 per page, logical heading hierarchy (h1-h6), landmark elements (nav, main, article, footer), and meaningful alt text on images.",
+      "Validate structured data (JSON-LD) if present: check against schema.org types using available validation. Only add structured data for content that actually exists on the page.",
+      "Review sitemap.xml: verify it lists public routes, excludes private ones, uses correct URLs (matching canonical), and is referenced in robots.txt.",
+      "Check rendering method impact: if the app uses client-side rendering (CSR/SPA), verify that critical content is available in the initial HTML or via SSR/SSG for crawler access.",
+      "Report findings with clear severity levels and actionable remediation. Never guarantee search rankings or AI citation outcomes."
+    ],
+    "avoid": [
+      "Adding structured data for content that does not exist on the page (fabricated reviews, fake FAQ, etc.).",
+      "Guaranteeing specific search rankings, traffic numbers, or AI citation placement.",
+      "Indexing authenticated or private pages that contain user data.",
+      "Adding SEO changes to routes that are behind authentication without verifying they are publicly accessible."
+    ],
+    "validation": ["claims calibrated (no guaranteed rankings)", "private pages excluded from indexing", "structured data matches actual page content", "sitemap references only public canonical URLs"]
+  },
+  {
+    "id": "testing-strategy",
+    "name": "Testing Strategy",
+    "description": "Design and execute a testing strategy covering unit, integration, API, and end-to-end tests structured around critical user journeys, risk areas, and the testing pyramid, with recorded commands and outcomes.",
+    "purpose": "Define which tests to write, at which layer, and for which risk areas; then execute available tests and record the actual commands, pass/fail results, and coverage gaps.",
+    "activation": "When acceptance criteria need verification, new features are implemented, or test coverage gaps are identified",
+    "inputs": ["risk assessment", "critical user journeys", "tech stack and test frameworks", "existing test suites", "acceptance criteria"],
+    "outputs": ["test plan (by layer and priority)", "executed test commands and results", "coverage report or gaps", "recommended additional tests"],
+    "procedure": [
+      "Inspect existing test suites: identify frameworks (Jest, Vitest, Mocha, Pytest, etc.), configuration, and current test count and pass rate by running the test command in dry-run or list mode if available.",
+      "Map critical user journeys: identify the 3-5 most important workflows (e.g., signup, login, core action, payment, data export) that must work for the product to be viable.",
+      "Design tests following the testing pyramid: unit tests for business logic and utilities, integration tests for API endpoints and database operations, E2E tests for critical journeys only.",
+      "For each layer, specify: what to test, what to mock/stub, expected assertions, and error cases. Prioritise tests by risk (what breaks causes the most damage).",
+      "Run the existing test suite and record: the exact command used, total tests, passed, failed, skipped, and execution time. Capture failure messages for failing tests.",
+      "Identify coverage gaps: untested error paths, missing edge cases, business logic without unit tests, API endpoints without integration tests.",
+      "Recommend specific tests to add, ordered by risk reduction value. Include the test description, layer, and what it validates."
+    ],
+    "avoid": [
+      "Claiming test coverage without running the test suite or a coverage tool.",
+      "Writing E2E tests for everything instead of using the testing pyramid appropriately.",
+      "Mocking so heavily that tests do not catch real integration failures.",
+      "Reporting test results from a previous run without re-executing."
+    ],
+    "validation": ["actual commands and outcomes recorded", "critical journeys covered or gaps documented", "test layer matches risk level", "failing tests diagnosed with remediation"]
+  },
+  {
+    "id": "release-readiness",
+    "name": "Release Readiness",
+    "description": "Pre-flight release gate assessment: verify test results, security findings, dependency health, environment configuration, deployment scripts, rollback procedures, and documentation before production deployment.",
+    "purpose": "Determine whether the application meets the criteria for production deployment by systematically checking every release gate and producing a go/no-go recommendation with evidence.",
+    "activation": "Before release, deployment, or handoff to production",
+    "inputs": ["test results", "security findings", "dependency audit results", "deployment context (environment, infrastructure)", "documentation status"],
+    "outputs": ["gate status (go/no-go for each gate)", "blocking issues with severity", "limitations and known issues", "next steps for remediation"],
+    "procedure": [
+      "Collect results from all prior skill assessments (testing, security, performance, SEO) and compile them into a gate checklist.",
+      "Verify critical release gates: no P0/P1 security vulnerabilities open, all critical user journey tests passing, no exposed secrets in the repository, authentication and authorisation functioning.",
+      "Check deployment readiness: environment variables documented and configured, database migrations tested, deployment scripts present and functional, rollback procedure defined.",
+      "Verify dependency health: no known critical CVEs in production dependencies, lockfile is committed and up to date, no phantom or unused dependencies.",
+      "Review documentation: README has setup instructions, API documentation matches implementation, CHANGELOG or release notes prepared, breaking changes documented.",
+      "Produce a gate-by-gate status table: Gate Name, Status (Pass/Fail/Unverified), Evidence, and Remediation Required. Flag any gate marked Unverified as a risk.",
+      "Issue a go/no-go recommendation. No-go if any critical gate fails. Conditional-go if non-critical gates fail with accepted risk. Document limitations and known issues for all outcomes."
+    ],
+    "avoid": [
+      "Claiming release readiness without evidence for each gate.",
+      "Marking gates as Pass based on agent assertions rather than executed checks.",
+      "Approving release when critical security vulnerabilities or failing critical tests exist.",
+      "Skipping rollback procedure verification."
+    ],
+    "validation": ["no unsupported readiness claim", "each gate backed by evidence or marked unverified", "critical blockers prevent go recommendation", "rollback procedure documented"]
+  },
+  {
+    "id": "performance",
+    "name": "Performance Engineering",
+    "description": "Measure and optimise application performance: Core Web Vitals (LCP, INP, CLS), bundle size analysis, server response times (TTFB), database query profiling (N+1 detection), memory usage, and caching strategy.",
+    "purpose": "Identify and prioritise performance bottlenecks through reproducible measurements, establish performance budgets, and recommend targeted optimisations with before/after evidence.",
+    "activation": "When latency, throughput, scalability, load, or performance requirements are present, or when users report slowness",
+    "inputs": ["performance goals or SLAs", "runtime measurements or user complaints", "load profile (concurrent users, request patterns)", "infrastructure constraints"],
+    "outputs": ["reproducible measurements with environment details", "performance budgets", "prioritised bottleneck list", "optimisation recommendations with expected impact"],
+    "procedure": [
+      "Establish performance goals: target TTFB (<200ms), LCP (<2.5s), INP (<200ms), CLS (<0.1), bundle size budget, and API response time targets.",
+      "Measure current state using available tools: Lighthouse CI (if browser available), webpack-bundle-analyzer or source-map-explorer for bundle size, server-side timing logs.",
+      "Profile database queries: identify N+1 query patterns by reviewing ORM usage and query logs. Check for missing indexes on frequently queried columns.",
+      "Analyse bundle size: identify the largest dependencies, check for tree-shaking effectiveness, look for duplicate packages, and measure gzipped transfer size.",
+      "Review caching strategy: HTTP cache headers (Cache-Control, ETag), CDN configuration, database query caching, and in-memory caching. Identify cacheable but uncached responses.",
+      "Check for common performance anti-patterns: synchronous blocking operations, unbounded list rendering, missing pagination, unoptimised images (format, dimensions, lazy loading), render-blocking resources.",
+      "Record all measurements with: tool used, environment (OS, Node version, hardware), timestamp, and exact command. Never fabricate benchmark numbers.",
+      "Prioritise bottlenecks by user impact and fix effort. Recommend specific changes with expected improvement."
+    ],
+    "avoid": [
+      "Fabricating benchmark numbers or Lighthouse scores without running the tool.",
+      "Optimising prematurely without measuring the actual bottleneck first.",
+      "Recommending infrastructure scaling when application-level fixes would suffice.",
+      "Comparing measurements taken in different environments without noting the difference."
+    ],
+    "validation": ["measure actual behavior (not theoretical)", "record the environment and tool versions", "do not invent benchmarks", "before/after measurements for applied optimisations"]
+  },
+  {
+    "id": "offline-first",
+    "name": "Offline and Synchronization Design",
+    "description": "Design offline-capable applications: local storage strategy, sync protocols, conflict resolution policies, optimistic UI updates, retry queues, and graceful degradation under unreliable network conditions.",
+    "purpose": "Define how the application stores data locally, synchronises with the server, resolves conflicts, and degrades gracefully when the network is unavailable or unreliable.",
+    "activation": "When offline use, synchronization, or unreliable networks are required by the user or the deployment context",
+    "inputs": ["offline workflows (which features must work offline)", "conflict policy (last-write-wins, merge, manual)", "connectivity assumptions (intermittent, fully offline, low bandwidth)", "data sensitivity and size"],
+    "outputs": ["sync design document", "conflict handling strategy", "failure recovery procedures", "local storage architecture", "offline capability matrix"],
+    "procedure": [
+      "Identify which features must work offline, which can degrade gracefully, and which require connectivity. Produce an offline capability matrix.",
+      "Choose a local storage strategy appropriate to data size and structure: IndexedDB for structured data, Cache API for assets, localStorage for small key-value config. Document storage quotas and eviction behaviour.",
+      "Design the sync protocol: define what triggers sync (connectivity restored, user action, interval), what data is synced (full vs incremental), and how sync state is tracked (timestamps, version vectors, sequence IDs).",
+      "Define the conflict resolution policy for each data type: last-write-wins (with server timestamp), field-level merge, or manual user resolution. Document which policy applies where and why.",
+      "Implement a retry queue for failed writes: queue mutations when offline, replay them in order on reconnection, handle permanent failures (409 conflict, 410 gone) distinctly from transient failures (503, timeout).",
+      "Design optimistic UI updates: show the user the expected result immediately, mark it as pending, and reconcile when the server confirms or rejects. Handle rollback for rejected mutations.",
+      "Test under degraded conditions: simulate offline (airplane mode), slow network (3G throttling), and intermittent connectivity. Verify that data is not lost, duplicated, or corrupted."
+    ],
+    "avoid": [
+      "Caching authenticated API responses or user credentials in local storage without reviewing privacy implications.",
+      "Assuming unlimited local storage; browsers enforce quotas and may evict data under storage pressure.",
+      "Using last-write-wins as the default conflict policy for all data types without considering merge alternatives for collaborative data.",
+      "Claiming offline support works without testing under actual degraded connectivity."
+    ],
+    "validation": ["define consistency expectations for each data type", "cover retries and conflicts with specific policies", "test degraded connectivity scenarios", "storage quotas and eviction documented"]
+  },
+  {
+    "id": "pwa-mobile-app",
+    "name": "PWA Mobile Installability",
+    "description": "Make a responsive web app installable from a phone browser as a Progressive Web App; use native packaging only when APK or IPA output is explicitly requested",
+    "purpose": "Make an existing responsive web application installable on Android and iOS as a Progressive Web App using its own origin, manifest, icons, and safe service worker behavior.",
+    "activation": "When the user wants a web app installable from a phone browser or asks to add a home-screen app experience; use native packaging skills only when a store APK/IPA is explicitly required",
+    "inputs": ["existing app framework and routes", "deployment origin and HTTPS availability", "offline requirements and authenticated data behavior", "brand assets and app name"],
+    "outputs": ["installability audit", "manifest and platform icons", "service-worker caching policy", "browser install control and iOS instructions", "device validation checklist"],
+    "procedure": [
+      "Inspect the app entry routes, responsive behavior, existing manifest, icons, service worker, authentication, and deployment origin before editing.",
+      "Add or update one manifest with a stable id, correct start_url and scope, standalone display, theme colors, and square 192px and 512px icons using the app's existing brand.",
+      "Add an in-app install button that captures beforeinstallprompt where supported, handles appinstalled, and gives Safari users clear Share → Add to Home Screen instructions.",
+      "Choose cache rules from actual data sensitivity: never cache authenticated API responses or user records by default; separate the offline shell from network-required data and document what works offline.",
+      "Register a scoped service worker only on secure contexts; use versioned caches and remove old caches during activation. Keep update behavior recoverable and avoid broad cache-all strategies.",
+      "Test manifest responses, icon dimensions, service-worker scope, install prompt behavior, iOS home-screen guidance, offline shell behavior, and API failure behavior on representative devices or emulators."
+    ],
+    "avoid": [
+      "Claiming that a PWA is an APK or IPA or that it has been published to an app store.",
+      "Caching authenticated API responses, credentials, or project data without a reviewed privacy and synchronization design.",
+      "Adding a service worker with broad cache-first handling for API or HTML responses that can become stale.",
+      "Claiming phone installation from a remote device when the app is served only on loopback or an insecure origin."
+    ],
+    "validation": ["manifest declares 192px and 512px install icons and correct application scope", "service worker is served from the intended scope over HTTPS or loopback", "install button behavior tested on supported Android browsers; iOS instructions tested in Safari", "offline claims match observed behavior and authenticated APIs are not cached"]
+  },
+  {
+    "id": "vibe-code-security",
+    "name": "Vibe-Code Security Audit",
+    "description": "Audit AI-generated (vibe-coded) applications for the security anti-patterns that AI coding agents commonly introduce: exposed API keys in frontend bundles, .env files committed to public repos, hardcoded secrets, missing server-side validation, prompt injection vectors, and over-permissive CORS.",
+    "purpose": "Catch the specific security holes that AI agents create by default — leaked secrets, missing .gitignore rules, client-side-only auth, and exposed system prompts — before the code reaches a public repository or production.",
+    "activation": "When auditing any AI-generated or vibe-coded project, after a rapid prototyping session, or when code was generated by Codex, Claude Code, Cursor, Copilot, or similar AI tools",
+    "inputs": ["repository tree and git history", "frontend bundle or source", "environment variable configuration", ".gitignore contents", "API routes and middleware", "AI agent prompts or system instructions if present"],
+    "outputs": ["vibe-code vulnerability report", "leaked secret inventory", "gitignore remediation patch", "client-vs-server validation matrix", "prompt exposure assessment"],
+    "procedure": [
+      "Scan git history (not just HEAD) for committed secrets: API keys, tokens, passwords, connection strings, and .env files. Use pattern matching for common key formats (AWS, Stripe, OpenAI, Firebase, Supabase, database URLs). Check if .env or .env.local was ever committed even if now gitignored.",
+      "Inspect .gitignore: verify it covers .env, .env.local, .env.production, node_modules, .DS_Store, and any framework-specific secret files. Add missing patterns.",
+      "Audit frontend source and built bundles for hardcoded secrets: search for API keys, tokens, and credentials in JS/TS source files, environment variable references that resolve client-side (NEXT_PUBLIC_, VITE_, REACT_APP_), and inline fetch calls with Authorization headers containing literal tokens.",
+      "Check for client-side-only validation: identify forms, API calls, and auth checks that exist only in frontend code with no corresponding server-side middleware or route guard. AI agents frequently skip server-side validation entirely.",
+      "Review CORS configuration: check if the server allows wildcard origins (*), reflects the Origin header without validation, or exposes sensitive headers. AI-generated Express/Fastify apps commonly use cors() with no options.",
+      "Assess prompt injection and system prompt exposure: if the app includes AI/LLM features, check whether system prompts are sent to the client, whether user input is concatenated into prompts without sanitisation, and whether API endpoints expose raw model responses including system instructions.",
+      "Check for AI-generated authentication anti-patterns: JWT secrets stored in frontend, tokens stored in localStorage (XSS-vulnerable), missing token expiry, password comparison with === instead of timing-safe comparison, and admin routes protected only by client-side checks.",
+      "Produce a prioritised report: for each finding, record Severity (P0-P3), Category (Secret Leak / Missing Server Validation / Prompt Exposure / Auth Anti-pattern / CORS Misconfiguration), File and Line, Impact, and specific Remediation steps."
+    ],
+    "avoid": [
+      "Assuming code is secure because it was generated by a reputable AI agent.",
+      "Only scanning the current HEAD without checking git history for previously committed secrets.",
+      "Treating NEXT_PUBLIC_ or VITE_ prefixed variables as safe because they are 'environment variables' — these are compiled into the public client bundle.",
+      "Logging, echoing, or including actual secret values in the audit report."
+    ],
+    "validation": ["git history scanned for committed secrets (not just current files)", ".gitignore covers all secret files", "server-side validation exists for every client-side check", "no API keys found in frontend bundles", "CORS configuration reviewed"]
+  },
+  {
+    "id": "agent-workflow-orchestration",
+    "name": "Agent Workflow Orchestration",
+    "description": "Design and manage multi-phase AI agent workflows with plan-execute-verify loops, context window management (context rot prevention), multi-model fallback strategies, goal-driven execution loops, and automated code review gates.",
+    "purpose": "Structure AI agent work into reliable, observable phases that prevent context rot, recover from model failures, and gate code quality before task completion — turning chaotic single-shot agent runs into disciplined engineering workflows.",
+    "activation": "When setting up AI agent workflows for a project, when agent runs produce inconsistent or degrading quality (context rot), when multi-model fallback is needed, or when automated review gates are required before merge",
+    "inputs": ["project requirements and task breakdown", "available AI agents and models (Codex, Claude Code, Antigravity, etc.)", "context window limits and token budgets", "code review criteria and quality gates", "existing CI/CD pipeline"],
+    "outputs": ["phased execution plan", "context management strategy", "model fallback configuration", "review gate definitions", "agent run monitoring setup"],
+    "procedure": [
+      "Break the project into small, self-contained phases. Each phase should have: a clear objective, input context (files to read), output deliverables (files to create/modify), and a verification step. No phase should require more than 60% of the model's context window.",
+      "Define the Plan-Execute-Verify loop for each phase: (1) Plan — the agent reads requirements and proposes an implementation approach, (2) Execute — the agent writes code within the scoped phase, (3) Verify — run tests, linters, and type checks to confirm the phase output is correct before proceeding.",
+      "Implement context rot prevention: at the start of each phase, provide a fresh context summary (project structure, completed phases, current phase requirements) instead of relying on accumulated conversation history. Store phase summaries in a structured handoff document (e.g., HANDOFF.md or project memory JSON).",
+      "Configure multi-model fallback: define a primary model for each task type, a fallback model if the primary hits rate limits or quota, and rules for automatic switching. Record which model executed each phase for traceability. Never silently switch models without logging.",
+      "Set up goal-driven execution loops: for each phase, define a completion condition (all tests pass, linter clean, specific files created). The agent retries the execute-verify cycle up to a bounded limit (e.g., 3 attempts) before escalating to human review.",
+      "Define automated code review gates between phases: before the next phase begins, run static analysis (ESLint, TypeScript, Semgrep), test suites, and diff-based review checks. Block phase advancement if critical issues are found.",
+      "Create an agent run manifest: document each phase's agent, model, context files, deliverables, verification commands, retry limit, and fallback model. This manifest is the executable specification for the entire workflow."
+    ],
+    "avoid": [
+      "Running a single agent session for an entire project without phase breaks (guaranteed context rot).",
+      "Assuming conversation history is a reliable context carrier beyond 50K tokens.",
+      "Silently switching models without recording which model produced which output.",
+      "Allowing unlimited retries — cap at 3-5 attempts per phase, then escalate.",
+      "Skipping the verify step because the execute step 'looked correct' in the agent's output."
+    ],
+    "validation": ["each phase has plan-execute-verify defined", "context rot prevention documented (handoff strategy)", "model fallback chain configured and logged", "review gates defined with blocking criteria", "retry limits bounded"]
+  },
+  {
+    "id": "design-reference-extraction",
+    "name": "Design Reference Extraction",
+    "description": "Extract design language, visual rules, tokens, and Do's and Don'ts from reference websites or design screenshots to generate a DESIGN.md specification file that AI agents use as a binding design constraint — preventing generic purple-gradient AI-generated UIs.",
+    "purpose": "Translate a visual reference (a website URL, screenshot, or design system) into a structured DESIGN.md file containing explicit design rules, tokens, Do's, and Don'ts so that AI coding agents produce UI that matches the intended aesthetic instead of defaulting to generic templates.",
+    "activation": "When the user provides a reference website, screenshot, or design inspiration and wants their AI-generated UI to match that style; when AI-generated frontends look generic or template-like; when creating a DESIGN.md for a project",
+    "inputs": ["reference website URL or screenshot", "brand assets (logo, colors, fonts) if available", "target framework (React, Vue, Svelte, plain HTML/CSS)", "existing design tokens or component library", "specific pages or sections to extract from"],
+    "outputs": ["DESIGN.md specification file", "extracted design tokens (colors, typography, spacing, radii, shadows)", "Do's list (patterns to follow)", "Don'ts list (patterns to avoid)", "component style guide"],
+    "procedure": [
+      "Inspect the reference source: if a URL, examine the live site's visual design, CSS custom properties, computed styles, layout patterns, and responsive behaviour. If a screenshot, analyse the visual hierarchy, colour palette, typography, spacing, and component patterns.",
+      "Extract the colour palette: identify primary, secondary, accent, background, surface, text, and border colours. Record exact hex/HSL values. Note colour usage patterns (e.g., 'primary used for CTAs only', 'backgrounds are always neutral').",
+      "Extract typography: identify font families (and fallback stacks), the type scale (heading sizes, body, caption, label), font weights used, line heights, and letter spacing. Note hierarchy patterns (e.g., 'headings are always uppercase', 'body text never exceeds 65ch width').",
+      "Extract spacing and layout: identify the spacing scale (4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px), grid system (columns, gutters, max-width), border radii, shadow levels, and container patterns.",
+      "Document interaction and motion patterns: hover states, focus indicators, transitions (duration, easing), loading states, and micro-interactions. Note reduced-motion accommodations.",
+      "Write the Do's section: specific, actionable rules the AI must follow. Examples: 'DO use 8px spacing increments', 'DO keep card border-radius at 12px', 'DO use the sans-serif stack for all UI text', 'DO maintain 60ch max-width for body text'.",
+      "Write the Don'ts section: explicit anti-patterns the AI must avoid. Examples: 'DON'T use purple-to-blue gradients on backgrounds', 'DON'T use more than 2 font families', 'DON'T add drop shadows to flat-design cards', 'DON'T center-align body text paragraphs'.",
+      "Compile everything into a DESIGN.md file with sections: Overview (design philosophy in 2-3 sentences), Tokens (colours, typography, spacing, radii, shadows as CSS custom properties), Layout Rules, Component Patterns, Do's, Don'ts, and Reference Source attribution."
+    ],
+    "avoid": [
+      "Copying proprietary design assets, logos, or copyrighted images from the reference site.",
+      "Extracting design rules without attributing the reference source.",
+      "Generating vague rules ('make it look clean') instead of specific tokens and values.",
+      "Assuming the reference site's design is accessible — verify contrast ratios independently.",
+      "Producing a DESIGN.md so long that it consumes too much agent context window — keep it under 300 lines."
+    ],
+    "validation": ["DESIGN.md contains concrete token values (not vague descriptions)", "Do's and Don'ts are specific and actionable", "colour contrast verified independently from reference", "DESIGN.md is under 300 lines to fit agent context windows", "reference source attributed"]
+  },
+  {
+    "id": "design-styles-catalog",
+    "name": "Design Styles Catalog",
+    "description": "Select and apply the right visual design style for a project from a curated catalog of 30+ modern styles (Minimalism, Brutalism, Glassmorphism, Neumorphism, Bento Grid, Neo-Brutalism, Y2K, Editorial, Swiss Design, etc.) with implementation tokens, use-case guidance, and framework-specific code patterns.",
+    "purpose": "Help teams choose an intentional design style instead of defaulting to generic AI-generated templates — providing the visual vocabulary, implementation tokens, and framework-specific code patterns for each style.",
+    "activation": "When starting a new UI project and no design direction exists, when the user asks for a specific design style, when AI-generated UI looks generic or template-like, or when exploring visual directions for a redesign",
+    "inputs": ["project type and audience", "brand personality (playful, professional, technical, luxury, etc.)", "target framework (React, Vue, Svelte, Tailwind, plain CSS)", "content type (dashboard, landing page, portfolio, SaaS, e-commerce)", "accessibility requirements"],
+    "outputs": ["recommended design style with rationale", "style-specific design tokens", "component patterns for the chosen style", "framework-specific implementation snippets", "style comparison matrix (if exploring options)"],
+    "procedure": [
+      "Understand the project context: what is the product, who is the audience, what emotion should the design evoke, and what content types dominate (data-heavy, media-rich, text-focused, interactive).",
+      "Present 2-3 candidate styles from the catalog that match the project context. For each candidate, explain: visual characteristics, best-suited project types, notable examples, and trade-offs (accessibility, performance, development complexity).",
+      "For the selected style, provide complete design tokens: colour palette (with hex values and CSS variables), typography stack, spacing scale, border-radius values, shadow definitions, background patterns, and animation characteristics.",
+      "Define component patterns specific to the style: how cards, buttons, navigation, forms, modals, and data tables should look. Include specific CSS properties that define the style (e.g., Glassmorphism: backdrop-filter, border with rgba, background with transparency).",
+      "Provide framework-specific code snippets: Tailwind utility classes, CSS custom properties, or styled-component patterns that implement the core style tokens. Include a starter component (e.g., a card or hero section) as a reference implementation.",
+      "Document style-specific accessibility considerations: Glassmorphism may fail contrast against variable backgrounds, Brutalism may confuse users expecting conventional navigation, dark themes need careful contrast tuning. Provide mitigations for each.",
+      "Produce a style guide summary: 1-page reference with the style name, 5-word description, token values, component example, Do's (3-5 rules), and Don'ts (3-5 anti-patterns) that an AI agent can use as a constraint."
+    ],
+    "avoid": [
+      "Recommending a style purely for aesthetic reasons without considering the audience and content type.",
+      "Applying Glassmorphism or other translucent styles without verifying text contrast against all possible backgrounds.",
+      "Mixing multiple competing styles (e.g., Brutalism + Neumorphism) without an intentional design rationale.",
+      "Generating token values without testing them in a real component — verify that the tokens produce the intended visual result.",
+      "Recommending complex styles (3D, heavy animation) for content-heavy or accessibility-critical applications without documenting the trade-offs."
+    ],
+    "validation": ["style matches project type and audience", "tokens produce the intended visual result when applied", "accessibility verified (contrast ratios, focus indicators, reduced-motion)", "framework-specific code is functional (not pseudo-code)", "Do's and Don'ts are specific to the chosen style"]
+  },
+  {
+    "id": "synthetic-customer-simulator",
+    "name": "Synthetic Customer Simulator",
+    "description": "Simulate a diverse panel of 50-100 synthetic customer personas to stress-test a project idea, value proposition, pricing tiers, and problem-solution fit before writing code or spending capital — delivering an unequivocal 'Build' vs 'No Need to Start' verdict.",
+    "purpose": "Provide founders and developers with immediate pre-build validation by simulating realistic customer segments with varying price sensitivity, switching barriers, domain cynicism, and daily habits so they know if the project is genuinely viable before starting.",
+    "activation": "At the start of project discovery, before starting development, when a new product idea needs market validation, or when testing pricing and positioning models",
+    "inputs": ["project concept or objective", "target customer profiles", "proposed pricing model", "competitor landscape", "core value proposition statement"],
+    "outputs": ["customer persona distribution breakdown", "simulated purchase conversion rate", "price elasticity curve", "top objections and friction points", "unfiltered customer feedback log", "definitive Build vs Kill/Pivot verdict"],
+    "procedure": [
+      "Define 5-10 distinct customer archetypes matching the product domain (e.g., budget-conscious student, busy freelancer, enterprise manager, tech-savvy early adopter, cynical non-technical user) and scale them into a representative 100-persona cohort.",
+      "Assign explicit parameters to each persona: budget constraint, willingness to pay, current alternative tool, switching friction tolerance, and primary daily frustration.",
+      "Pitch the project's exact core value proposition and proposed pricing to all 100 simulated personas in parallel.",
+      "Tally initial buy/reject decisions and calculate baseline conversion (e.g., 14/100 purchase rate). Extract precise rejection rationales from the non-buyers.",
+      "Analyze pricing sensitivity: simulate reactions at 50%, 100%, and 150% of the target price to determine the revenue-maximizing price point.",
+      "Identify the top 3 product and positioning bottlenecks (e.g., confusing value metric, lack of integration with existing stack, perceived high switching cost).",
+      "Formulate 3 concrete pivots/remedies (repackaging, tiering, or narrowing to a specific niche) and re-test the cohort to observe delta in conversion.",
+      "Issue a final project feasibility verdict: 'GREEN / BUILD' (conversion > 40%), 'AMBER / PIVOT' (requires proposition adjustment), or 'RED / DO NOT START' (fundamental lack of demand or willingness to pay)."
+    ],
+    "avoid": [
+      "Assuming all synthetic personas are enthusiastic tech early adopters who love new tools.",
+      "Allowing personas to agree without expressing realistic objections regarding cost, habit, and friction.",
+      "Treating synthetic simulation as a substitute for real customer interviews — use it to eliminate obvious non-starters before speaking to humans.",
+      "Masking a 'RED / DO NOT START' result with vague optimistic advice."
+    ],
+    "validation": ["persona cohort contains realistic cynics and budget-constrained users", "conversion rate backed by itemized persona decisions", "rejection rationales explicitly recorded", "definitive Build vs Pivot vs Kill recommendation provided"]
+  },
+  {
+    "id": "multi-agent-interview-panel",
+    "name": "Multi-Agent Technical & System Interview Panel",
+    "description": "Spin up an adversarial panel of 5 specialized AI interviewers (System Architect, Security Lead, Product Manager, Senior QA/SRE, and Engineering Manager) to rigorously grill the developer on the completed project — preparing them for any technical, architectural, or behavioral interview question.",
+    "purpose": "Equip the developer with deep, interview-ready mastery of their codebase by grilling them on architecture choices, security trade-offs, scaling bottlenecks, failure modes, and code walkthroughs before they present or interview.",
+    "activation": "When a project is built and ready for review, before job interviews or portfolio presentations, or when the developer wants to defend their architectural and implementation decisions",
+    "inputs": ["completed project codebase", "architecture decisions (ADRs)", "dependency list and data models", "target job role or presentation audience (e.g., Senior Full-Stack, Staff Architect, Tech Lead)"],
+    "outputs": ["interview panel scorecard", "transcribed multi-round Q&A grill log", "architectural weak points exposed", "model answer talking points for portfolio defense", "readiness assessment score (1-10)"],
+    "procedure": [
+      "Initialize the 5-member interview panel with distinct agendas: (1) System Architect (system boundaries, scaling, data models), (2) Security Lead (threat model, secret hygiene, auth, injection), (3) Product Manager (user journeys, trade-offs, business value), (4) QA/SRE (test pyramid, failure modes, observability, outages), (5) Engineering Manager (ADR rationale, tech debt, team handoff).",
+      "Scan the completed codebase and git history to identify real vulnerabilities, missing indexes, unhandled async errors, or architectural shortcuts to use as interview ammunition.",
+      "Conduct Round 1 — System & Architecture Grill: challenge why particular frameworks, databases, and schema designs were selected over alternatives.",
+      "Conduct Round 2 — Failure Mode & Security Cross-Examination: ask what happens when third-party APIs fail, DB connections pool out, or malicious input bypasses client guards.",
+      "Conduct Round 3 — Code Walkthrough & Deep-Dive: pick specific complex functions or controllers in the project and ask the developer to explain time complexity, memory footprint, and concurrency handling.",
+      "Conduct Round 4 — Behavioral & Trade-off Defense: probe why certain features were cut, what technical debt was accepted, and what would be redesigned with double the timeline.",
+      "Score candidate answers on clarity, technical precision, and honesty about constraints. Highlight weak responses and provide polished, senior-level model answers for each topic."
+    ],
+    "avoid": [
+      "Asking superficial trivia questions rather than probing the actual code written in the repository.",
+      "Letting the developer give vague non-answers without challenging them for specifics.",
+      "Focusing only on theoretical knowledge instead of practical trade-offs made in this specific project.",
+      "Providing scorecards without actionable model talking points."
+    ],
+    "validation": ["questions reference actual repository files and functions", "all 5 panelist personas ask distinct domain-relevant questions", "weak answers identified with concrete senior-level talking points", "readiness score backed by itemized evaluation criteria"]
+  }
+]

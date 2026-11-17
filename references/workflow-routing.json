@@ -1,0 +1,107 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "id": "pwa",
+      "title": "Make the web app installable on phones",
+      "agent": "design",
+      "skill": "pwa-mobile-app",
+      "dependsOn": ["implementation"],
+      "triggers": [
+        {"id":"pwa-installability","pattern":"\\b(PWA|progressive web app|installable|home[- ]screen app|phone app)\\b"}
+      ]
+    },
+    {
+      "id": "performance",
+      "title": "Measure performance and define budgets",
+      "agent": "performance",
+      "skill": "performance",
+      "dependsOn": ["implementation"],
+      "triggers": [
+        {"id":"performance-goal","pattern":"\\b(performance|latency|throughput|scale|scalability|load|traffic)\\b"}
+      ]
+    },
+    {
+      "id": "offline",
+      "title": "Assess offline behavior and synchronization",
+      "agent": "architecture",
+      "skill": "offline-first",
+      "dependsOn": ["implementation"],
+      "triggers": [
+        {"id":"offline-support","pattern":"\\boffline\\b"},
+        {"id":"synchronization","pattern":"\\bsync\\b|synchroni[sz]"},
+        {"id":"poor-connectivity","pattern":"poor network"}
+      ]
+    },
+    {
+      "id": "animation",
+      "title": "Review animation and interaction behavior",
+      "agent": "design",
+      "skill": "design-intelligence",
+      "dependsOn": ["design"],
+      "triggers": [
+        {"id":"motion-design","pattern":"\\b(animation|motion|microinteraction)\\b"}
+      ]
+    },
+    {
+      "id": "vibe-security",
+      "title": "Audit AI and vibe-coded security anti-patterns",
+      "agent": "security",
+      "skill": "vibe-code-security",
+      "dependsOn": ["implementation"],
+      "triggers": [
+        {"id":"vibe-code","pattern":"\\b(vibe[- ]cod(ed|ing)|ai[- ]generated|prompt[- ]injection|leaked key|secret leak)\\b"}
+      ]
+    },
+    {
+      "id": "agent-orchestration",
+      "title": "Structure multi-phase AI agent execution",
+      "agent": "architecture",
+      "skill": "agent-workflow-orchestration",
+      "dependsOn": ["foundation"],
+      "triggers": [
+        {"id":"orchestration","pattern":"\\b(agent workflow|context rot|multi[- ]model|plan[- ]execute[- ]verify|agent loop)\\b"}
+      ]
+    },
+    {
+      "id": "design-extraction",
+      "title": "Extract design reference into DESIGN.md",
+      "agent": "design",
+      "skill": "design-reference-extraction",
+      "dependsOn": ["design"],
+      "triggers": [
+        {"id":"design-md","pattern":"\\b(DESIGN\\.md|reference (website|url|site)|extract design|clone design|apple[- ]like)\\b"}
+      ]
+    },
+    {
+      "id": "design-styles",
+      "title": "Select and apply visual design style",
+      "agent": "design",
+      "skill": "design-styles-catalog",
+      "dependsOn": ["design"],
+      "triggers": [
+        {"id":"design-style","pattern":"\\b(design style|bento grid|brutalism|glassmorphism|neumorphism|minimalism|y2k)\\b"}
+      ]
+    },
+    {
+      "id": "customer-simulation",
+      "title": "Validate idea viability with 100 synthetic customer personas",
+      "agent": "architecture",
+      "skill": "synthetic-customer-simulator",
+      "dependsOn": ["foundation"],
+      "triggers": [
+        {"id":"customer-sim","pattern":"\\b(validate idea|customer simulation|synthetic customers?|worth starting|price testing|market fit)\\b"}
+      ]
+    },
+    {
+      "id": "interview-prep",
+      "title": "Grill developer with 5-agent technical interview panel",
+      "agent": "delivery",
+      "skill": "multi-agent-interview-panel",
+      "dependsOn": ["delivery"],
+      "triggers": [
+        {"id":"interview-panel","pattern":"\\b(interview prep|mock interview|interview panel|grill me|code review defense|portfolio prep)\\b"}
+      ]
+    }
+  ]
+}

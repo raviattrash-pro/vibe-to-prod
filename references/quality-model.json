@@ -1,0 +1,16 @@
+{
+  "categories": [
+    {"id":"design","name":"UI/UX and visual design","weight":12},
+    {"id":"interaction","name":"Animation and interaction","weight":6},
+    {"id":"accessibility","name":"Responsive design and accessibility","weight":10},
+    {"id":"seo","name":"SEO and AI discoverability","weight":10},
+    {"id":"security","name":"Application security","weight":14},
+    {"id":"auth","name":"Authentication and authorization","weight":8},
+    {"id":"architecture","name":"Architecture and system design","weight":10},
+    {"id":"reliability","name":"Scalability and reliability","weight":8},
+    {"id":"offline","name":"Offline and synchronization","weight":5},
+    {"id":"performance","name":"Performance","weight":6},
+    {"id":"testing","name":"Testing and QA","weight":7},
+    {"id":"delivery","name":"Deployment and observability","weight":4}
+  ]
+}

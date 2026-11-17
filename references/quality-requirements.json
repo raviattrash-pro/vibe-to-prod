@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "profiles": {
+    "SaaS Application": [
+      {"id":"security-secrets","evaluatorId":"secret-scan","category":"security","title":"Repository secret scan"},
+      {"id":"security-dependencies","evaluatorId":"dependency-audit","category":"security","title":"Dependency vulnerability audit"},
+      {"id":"quality-tests","evaluatorId":"node-tests","category":"testing","title":"Automated test run"},
+      {"id":"accessibility-rendered","evaluatorId":"accessibility-rendered","category":"accessibility","title":"Rendered accessibility audit","standard":"WCAG 2.2 A/AA starter coverage","reference":"https://www.w3.org/TR/WCAG22/"},
+      {"id":"deployment-baseline","evaluatorId":"deployment-config","category":"delivery","title":"Deployment configuration baseline"}
+    ],
+    "Website": [
+      {"id":"seo-rendered","evaluatorId":"seo-rendered","category":"seo","title":"Rendered SEO audit"},
+      {"id":"accessibility-rendered","evaluatorId":"accessibility-rendered","category":"accessibility","title":"Rendered accessibility audit","standard":"WCAG 2.2 A/AA starter coverage","reference":"https://www.w3.org/TR/WCAG22/"},
+      {"id":"performance-browser","evaluatorId":"performance-browser","category":"performance","title":"Browser performance audit"},
+      {"id":"quality-tests","evaluatorId":"node-tests","category":"testing","title":"Automated test run"}
+    ],
+    "Enterprise Application": [
+      {"id":"security-secrets","evaluatorId":"secret-scan","category":"security","title":"Repository secret scan"},
+      {"id":"security-dependencies","evaluatorId":"dependency-audit","category":"security","title":"Dependency vulnerability audit"},
+      {"id":"quality-tests","evaluatorId":"node-tests","category":"testing","title":"Automated test run"},
+      {"id":"deployment-baseline","evaluatorId":"deployment-config","category":"delivery","title":"Deployment configuration baseline"}
+    ],
+    "E-commerce": [
+      {"id":"security-secrets","evaluatorId":"secret-scan","category":"security","title":"Repository secret scan"},
+      {"id":"security-dependencies","evaluatorId":"dependency-audit","category":"security","title":"Dependency vulnerability audit"},
+      {"id":"seo-rendered","evaluatorId":"seo-rendered","category":"seo","title":"Rendered SEO audit"},
+      {"id":"accessibility-rendered","evaluatorId":"accessibility-rendered","category":"accessibility","title":"Rendered accessibility audit","standard":"WCAG 2.2 A/AA starter coverage","reference":"https://www.w3.org/TR/WCAG22/"},
+      {"id":"quality-tests","evaluatorId":"node-tests","category":"testing","title":"Automated test run"}
+    ],
+    "Developer Tool": [
+      {"id":"security-secrets","evaluatorId":"secret-scan","category":"security","title":"Repository secret scan"},
+      {"id":"security-dependencies","evaluatorId":"dependency-audit","category":"security","title":"Dependency vulnerability audit"},
+      {"id":"quality-tests","evaluatorId":"node-tests","category":"testing","title":"Automated test run"},
+      {"id":"deployment-baseline","evaluatorId":"deployment-config","category":"delivery","title":"Deployment configuration baseline"}
+    ],
+    "Custom Application": [
+      {"id":"quality-tests","evaluatorId":"node-tests","category":"testing","title":"Automated test run"},
+      {"id":"security-secrets","evaluatorId":"secret-scan","category":"security","title":"Repository secret scan"}
+    ]
+  },
+  "limits": ["Profile requirements are baseline prompts, not a full compliance checklist.", "An evaluator can be unverified or unsupported; absence of a run never counts as a pass.", "Human review and project-specific requirements remain necessary."]
+}
