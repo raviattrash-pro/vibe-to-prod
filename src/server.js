@@ -22,6 +22,7 @@ import { auditProjectTrustEvidence, computeRepositoryFingerprint } from './trust
 import { buildDigitalTwinGraph } from './twin/graph.js';
 import { analyzeChangeImpact } from './twin/impact.js';
 import { runBrowserQaSuite } from './qa/browser.js';
+import { runAttackSimulation } from './security/attack-lab.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -121,6 +122,63 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
         recorded = recordEvaluation(current, check);
         current.updatedAt = createdAt;
         current.activity.unshift({ at: createdAt, text: `Browser QA executed: ${result.status} (${result.bugReports.length} bug report(s))` });
+        quality = evaluateQuality(current.checks, current.type);
+        return true;
+      });
+      return send(res, 201, { check, quality, report: result });
+    }
+    const attackLabMatch = route.match(/^\/api\/projects\/([\w-]+)\/evaluations\/attack-lab$/);
+    if (attackLabMatch && method === 'POST') {
+      const [, id] = attackLabMatch;
+      const input = await body(req);
+      if (input.authorized !== true) return send(res, 400, { error: 'Explicit authorization is required before running Attack Simulation Lab (set authorized: true).' });
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const attackOutput = path.resolve(dataDirectory, 'security', id);
+      const result = await runAttackSimulation({
+        authorized: input.authorized,
+        environment: input.environment || 'staging',
+        allowProduction: input.allowProduction === true,
+        targetUrl: input.targetUrl || '',
+        repositoryPath: project.repositoryPath,
+        headers: input.headers || {},
+        cookies: input.cookies || [],
+        routes: input.routes || [],
+        uploadHandlers: input.uploadHandlers || [],
+        outputDirectory: attackOutput
+      });
+      const createdAt = new Date().toISOString();
+      const check = {
+        id: randomUUID(),
+        category: 'security',
+        title: 'Attack Simulation Lab Verification',
+        status: result.status,
+        score: result.status === 'pass' ? 100 : result.summary.criticalCount > 0 ? 0 : 40,
+        evidence: result.evidence,
+        critical: result.summary.criticalCount > 0,
+        verification: 'automated',
+        source: 'attack-lab',
+        provenance: {
+          kind: 'automated',
+          evaluatorId: 'attack-lab',
+          evaluatorVersion: '1.0.0',
+          capturedAt: createdAt,
+          execution: 'attack-simulation'
+        },
+        resultDetails: {
+          scenariosTested: result.scenariosTested,
+          summary: result.summary,
+          findings: (result.findings || []).slice(0, 50)
+        },
+        createdAt
+      };
+      let quality, recorded;
+      await updateProjects(projectStore, projects => {
+        const current = projects.find(p => p.id === id);
+        if (!current) return false;
+        recorded = recordEvaluation(current, check);
+        current.updatedAt = createdAt;
+        current.activity.unshift({ at: createdAt, text: `Attack Simulation Lab executed: ${result.status} (${result.summary.failed} failed finding(s))` });
         quality = evaluateQuality(current.checks, current.type);
         return true;
       });
