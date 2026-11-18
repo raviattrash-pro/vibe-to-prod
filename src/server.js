@@ -16,6 +16,8 @@ import { auditDeploymentConfig, auditRenderedPerformance, auditRenderedRepositor
 import { createTaskPrompt, providers, runAntigravity, runClaudeCode, runCodex } from './adapters.js';
 import { qualityReportMarkdown } from './reports.js';
 import { applyChangeProposal, createChangeProposal } from './proposals.js';
+import { ExecutionEngine } from './execution/engine.js';
+import { createExecutionSession } from './execution/state.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -36,8 +38,9 @@ function withQuality(p) { normalizeActivity(p);for(const workflow of p.workflows
 async function updateProjects(projectStore,mutator){const apply=async records=>{const prior=new Map(records.map(project=>[project.id,new Set(project.activity||[])]));const result=await mutator(records);const actor=requestContext.getStore()?.actor;if(actor)for(const project of records)for(const event of project.activity||[])if(!prior.get(project.id)?.has(event))event.actor=actor;for(const project of records)normalizeActivity(project);return result;};if(typeof projectStore.update==='function')return projectStore.update(apply);const records=await projectStore.all();const result=await apply(records);await projectStore.save(records);return result;}
 
 export function createAppServer({ projectStore = store, authService=auth, dataDirectory=path.resolve(process.env.AGENCYOS_DATA_DIR||'data'), agentRunner = runCodex, claudeRunner = runClaudeCode, antigravityRunner = runAntigravity, renderedRunner = auditRenderedRepository, performanceRunner = auditRenderedPerformance, visualReviewRunner=auditVisualReview } = {}) {
+ const executionEngine = new ExecutionEngine({ runners: { codex: agentRunner, 'claude-code': claudeRunner, antigravity: antigravityRunner } });
  const serverInstanceId=randomUUID();let recoveryPromise;
- const recoverRuns=()=>{if(!recoveryPromise)recoveryPromise=updateProjects(projectStore,records=>{for(const project of records){for(const run of project.agentRuns||[])if(run.status==='running'&&run.serverInstanceId!==serverInstanceId){const at=new Date().toISOString();run.status='orphaned';run.completedAt=at;run.error='AgencyOS restarted or lost the run owner; final agent process outcome is unknown. Inspect the repository before retrying.';run.events??=[];run.events.push({type:'run.orphaned',text:run.error,at});project.activity.unshift({at,text:`Codex run outcome unknown: ${run.id}`});}for(const proposal of project.changeProposals||[])if(proposal.status==='applying'){proposal.status='unknown';proposal.error='AgencyOS restarted while applying this proposal. Inspect the target file before taking further action.';proposal.updatedAt=new Date().toISOString();}}}).catch(error=>{recoveryPromise=null;throw error;});return recoveryPromise;};
+ const recoverRuns=()=>{if(!recoveryPromise)recoveryPromise=updateProjects(projectStore,records=>{for(const project of records){for(const run of project.agentRuns||[])if(run.status==='running'&&run.serverInstanceId!==serverInstanceId){const at=new Date().toISOString();run.status='orphaned';run.completedAt=at;run.error='AgencyOS restarted or lost the run owner; final agent process outcome is unknown. Inspect the repository before retrying.';run.events??=[];run.events.push({type:'run.orphaned',text:run.error,at});project.activity.unshift({at,text:`Codex run outcome unknown: ${run.id}`});}for(const session of project.executionSessions||[])if(session.status==='running'){session.status='failed';session.error='AgencyOS restarted; in-flight execution session interrupted.';session.completedAt=new Date().toISOString();}for(const proposal of project.changeProposals||[])if(proposal.status==='applying'){proposal.status='unknown';proposal.error='AgencyOS restarted while applying this proposal. Inspect the target file before taking further action.';proposal.updatedAt=new Date().toISOString();}}}).catch(error=>{recoveryPromise=null;throw error;});return recoveryPromise;};
  return createServer((req,res)=>requestContext.run({actor:null},async()=>{
   try {
    await recoverRuns();
@@ -116,6 +119,119 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
     }
     const runStatusMatch=route.match(/^\/api\/projects\/([\w-]+)\/agents\/runs\/([\w-]+)$/);
     if(runStatusMatch&&method==='GET'){const [,id,runId]=runStatusMatch;const project=(await projectStore.all()).find(p=>p.id===id);if(!project)return send(res,404,{error:'Project not found.'});const run=project.agentRuns?.find(r=>r.id===runId);return run?send(res,200,run):send(res,404,{error:'Agent run not found.'})}
+    const executionsMatch = route.match(/^\/api\/projects\/([\w-]+)\/executions(?:\/([\w-]+)(?:\/(approve|cancel))?)?$/);
+    if (executionsMatch) {
+      const [, id, sessionId, subAction] = executionsMatch;
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+
+      if (method === 'GET' && !sessionId) {
+        return send(res, 200, project.executionSessions || []);
+      }
+      if (method === 'GET' && sessionId && !subAction) {
+        const session = (project.executionSessions || []).find(s => s.id === sessionId);
+        return session ? send(res, 200, session) : send(res, 404, { error: 'Execution session not found.' });
+      }
+      if (method === 'POST' && !sessionId) {
+        const input = await body(req);
+        if (input.approved !== true) return send(res, 400, { error: 'Explicit approval is required before starting a multi-task execution workflow.' });
+        const flow = (project.workflows || []).find(w => w.id === input.workflowId);
+        if (!flow) return send(res, 404, { error: 'Workflow not found.' });
+
+        const activeSession = (project.executionSessions || []).find(s => ['pending', 'running', 'paused_for_approval'].includes(s.status));
+        if (activeSession) {
+          return send(res, 409, { error: `An execution session '${activeSession.id}' is already in status '${activeSession.status}'.` });
+        }
+
+        const session = createExecutionSession({
+          workflow: flow,
+          project,
+          provider: input.provider || 'codex',
+          idempotencyKey: input.idempotencyKey,
+          approved: true,
+          approvalCheckpoints: input.approvalCheckpoints
+        });
+
+        await updateProjects(projectStore, records => {
+          const current = records.find(p => p.id === id);
+          if (!current) return false;
+          current.executionSessions = current.executionSessions || [];
+          current.executionSessions.unshift(session);
+          current.activity.unshift({ at: session.createdAt, text: `Execution session started for workflow ${flow.id}` });
+          return true;
+        });
+
+        Promise.resolve().then(() => executionEngine.runSession(session, project, flow, {
+          onUpdate: async (updated) => {
+            await updateProjects(projectStore, records => {
+              const current = records.find(p => p.id === id);
+              if (!current) return false;
+              const idx = (current.executionSessions || []).findIndex(s => s.id === updated.id);
+              if (idx >= 0) current.executionSessions[idx] = { ...updated };
+              return true;
+            });
+          }
+        })).catch(err => {
+          session.status = 'failed';
+          session.error = err.message;
+        });
+
+        return send(res, 202, { sessionId: session.id, status: session.status, session });
+      }
+      if (method === 'POST' && sessionId && subAction === 'approve') {
+        const input = await body(req);
+        let session;
+        const result = await updateProjects(projectStore, records => {
+          const current = records.find(p => p.id === id);
+          if (!current) return 'not_found';
+          session = (current.executionSessions || []).find(s => s.id === sessionId);
+          if (!session) return 'session_not_found';
+          try {
+            executionEngine.approveCheckpoint(session, input.taskId);
+            return 'ok';
+          } catch (err) {
+            return err;
+          }
+        });
+        if (result === 'not_found' || result === 'session_not_found') return send(res, 404, { error: 'Execution session not found.' });
+        if (result instanceof Error) return send(res, result.status || 400, { error: result.message });
+
+        const flow = (project.workflows || []).find(w => w.id === session.workflowId);
+        Promise.resolve().then(() => executionEngine.runSession(session, project, flow, {
+          onUpdate: async (updated) => {
+            await updateProjects(projectStore, records => {
+              const current = records.find(p => p.id === id);
+              if (!current) return false;
+              const idx = (current.executionSessions || []).findIndex(s => s.id === updated.id);
+              if (idx >= 0) current.executionSessions[idx] = { ...updated };
+              return true;
+            });
+          }
+        }));
+
+        return send(res, 200, { sessionId: session.id, status: session.status });
+      }
+      if (method === 'POST' && sessionId && subAction === 'cancel') {
+        const input = await body(req);
+        let session;
+        const result = await updateProjects(projectStore, records => {
+          const current = records.find(p => p.id === id);
+          if (!current) return 'not_found';
+          session = (current.executionSessions || []).find(s => s.id === sessionId);
+          if (!session) return 'session_not_found';
+          try {
+            executionEngine.cancelSession(session, input.reason || 'User requested cancellation');
+            return 'ok';
+          } catch (err) {
+            return err;
+          }
+        });
+        if (result === 'not_found' || result === 'session_not_found') return send(res, 404, { error: 'Execution session not found.' });
+        if (result instanceof Error) return send(res, result.status || 400, { error: result.message });
+
+        return send(res, 200, { sessionId: session.id, status: session.status, cancelReason: session.cancelReason });
+      }
+    }
     const reportMatch=route.match(/^\/api\/projects\/([\w-]+)\/report\.md$/);
     if(reportMatch&&method==='GET'){const [,id]=reportMatch;const project=(await projectStore.all()).find(p=>p.id===id);if(!project)return send(res,404,{error:'Project not found.'});const quality=evaluateQuality(project.checks,project.type);res.writeHead(200,{'content-type':'text/markdown; charset=utf-8','content-disposition':`attachment; filename="agencyos-${id}-quality-report.md"`,'cache-control':'no-store','x-content-type-options':'nosniff'});return res.end(qualityReportMarkdown(project,quality));}
     const exportMatch=route.match(/^\/api\/projects\/([\w-]+)\/export\.json$/);

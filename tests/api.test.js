@@ -160,3 +160,109 @@ test('backup restore gives a new identity and orphans unverifiable active runs',
  response=await fetch(`${base}/api/projects/import`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({approved:true,backup:largeBackup})});assert.equal(response.status,201);
  response=await fetch(`${base}/api/projects`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:'Oversized request',padding:'x'.repeat(1_100_000)})});assert.equal(response.status,413);
 });
+
+test('executions API starts, inspects, approves, and cancels multi-task execution sessions', async t => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'agencyos-exec-api-'));
+  const repo = path.join(dir, 'repo');
+  await mkdir(repo);
+
+  const mockRunner = async ({ prompt }) => {
+    return { status: 'completed', exitCode: 0, output: 'Executed task in test' };
+  };
+
+  const server = createAppServer({
+    projectStore: new Store(path.join(dir, 'db.json')),
+    agentRunner: mockRunner
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  t.after(async () => {
+    await new Promise(resolve => server.close(resolve));
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  let res = await fetch(`${base}/api/projects`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'Execution Project', repositoryPath: repo })
+  });
+  const project = await res.json();
+
+  res = await fetch(`${base}/api/projects/${project.id}/workflow`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: '{}'
+  });
+  const workflow = await res.json();
+
+  // Starting without approval is rejected
+  res = await fetch(`${base}/api/projects/${project.id}/executions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ workflowId: workflow.id, provider: 'codex' })
+  });
+  assert.equal(res.status, 400);
+
+  // Start execution with approval
+  res = await fetch(`${base}/api/projects/${project.id}/executions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      approved: true,
+      workflowId: workflow.id,
+      provider: 'codex',
+      approvalCheckpoints: ['design']
+    })
+  });
+  assert.equal(res.status, 202);
+  const { sessionId } = await res.json();
+  assert.ok(sessionId);
+
+  // Duplicate concurrent session is rejected with 409
+  res = await fetch(`${base}/api/projects/${project.id}/executions`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      approved: true,
+      workflowId: workflow.id,
+      provider: 'codex'
+    })
+  });
+  assert.equal(res.status, 409);
+
+  // Poll until it pauses at checkpoint 'design'
+  let session;
+  for (let i = 0; i < 50; i++) {
+    await new Promise(r => setTimeout(r, 20));
+    res = await fetch(`${base}/api/projects/${project.id}/executions/${sessionId}`);
+    session = await res.json();
+    if (session.status === 'paused_for_approval') break;
+  }
+  assert.equal(session.status, 'paused_for_approval');
+  assert.equal(session.approvalRequiredFor, 'design');
+
+  // List sessions
+  res = await fetch(`${base}/api/projects/${project.id}/executions`);
+  const sessions = await res.json();
+  assert.equal(sessions.length, 1);
+  assert.equal(sessions[0].id, sessionId);
+
+  // Approve the checkpoint
+  res = await fetch(`${base}/api/projects/${project.id}/executions/${sessionId}/approve`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ taskId: 'design' })
+  });
+  assert.equal(res.status, 200);
+
+  // Cancel the session
+  res = await fetch(`${base}/api/projects/${project.id}/executions/${sessionId}/cancel`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ reason: 'Integration test complete' })
+  });
+  assert.equal(res.status, 200);
+  const cancelResult = await res.json();
+  assert.equal(cancelResult.status, 'cancelled');
+  assert.equal(cancelResult.cancelReason, 'Integration test complete');
+});
