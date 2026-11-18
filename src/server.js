@@ -25,6 +25,7 @@ import { runBrowserQaSuite } from './qa/browser.js';
 import { runAttackSimulation } from './security/attack-lab.js';
 import { evaluateMarketReality } from './validation/reality-check.js';
 import { generateScaleForecast } from './forecaster/scale.js';
+import { executeDeploymentRehearsal } from './deployment/rehearsal.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -294,6 +295,62 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
         return true;
       });
       return send(res, 201, { check, quality, forecast });
+    }
+    const rehearsalMatch = route.match(/^\/api\/projects\/([\w-]+)\/rehearsal$/);
+    if (rehearsalMatch && method === 'POST') {
+      const [, id] = rehearsalMatch;
+      const input = await body(req);
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const rehearsal = await executeDeploymentRehearsal({
+        repositoryPath: project.repositoryPath,
+        environment: input.environment || 'staging',
+        allowProductionDeployment: input.allowProductionDeployment === true,
+        targetUrl: input.targetUrl || '',
+        lastBackup: input.lastBackup || project.lastBackup || null,
+        dependencies: input.dependencies || [],
+        rollbackConfig: input.rollbackConfig || {}
+      });
+      const createdAt = new Date().toISOString();
+      const check = {
+        id: randomUUID(),
+        category: 'delivery',
+        title: 'Pre-Flight Staging Deployment Rehearsal',
+        status: rehearsal.releaseReady ? 'pass' : 'fail',
+        score: rehearsal.releaseReady ? 100 : rehearsal.riskLevel === 'critical' ? 0 : 40,
+        evidence: rehearsal.evidence,
+        critical: rehearsal.riskLevel === 'critical',
+        verification: 'automated',
+        source: 'deployment-rehearsal',
+        provenance: {
+          kind: 'automated',
+          evaluatorId: 'deployment-rehearsal',
+          evaluatorVersion: '1.0.0',
+          capturedAt: createdAt,
+          execution: 'staging-preflight-drill'
+        },
+        resultDetails: {
+          rehearsalId: rehearsal.rehearsalId,
+          environment: rehearsal.environment,
+          releaseReady: rehearsal.releaseReady,
+          riskLevel: rehearsal.riskLevel,
+          blockers: rehearsal.blockers,
+          warnings: rehearsal.warnings,
+          checkpoints: rehearsal.checkpoints
+        },
+        createdAt
+      };
+      let quality, recorded;
+      await updateProjects(projectStore, projects => {
+        const current = projects.find(p => p.id === id);
+        if (!current) return false;
+        recorded = recordEvaluation(current, check);
+        current.updatedAt = createdAt;
+        current.activity.unshift({ at: createdAt, text: `Deployment Rehearsal: ${rehearsal.releaseReady ? 'PASSED' : 'BLOCKED'} (Risk: ${rehearsal.riskLevel.toUpperCase()})` });
+        quality = evaluateQuality(current.checks, current.type);
+        return true;
+      });
+      return send(res, 201, { check, quality, rehearsal });
     }
     const evaluationHistoryMatch=route.match(/^\/api\/projects\/([\w-]+)\/evaluations\/history$/);
     if(evaluationHistoryMatch&&method==='GET'){const project=(await projectStore.all()).find(p=>p.id===evaluationHistoryMatch[1]);return project?send(res,200,project.evaluationHistory||[]):send(res,404,{error:'Project not found.'})}
