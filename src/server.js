@@ -27,6 +27,7 @@ import { evaluateMarketReality } from './validation/reality-check.js';
 import { generateScaleForecast } from './forecaster/scale.js';
 import { executeDeploymentRehearsal } from './deployment/rehearsal.js';
 import { generateProductionPassport, formatPassportMarkdown } from './passport/generator.js';
+import { AgentObservatory } from './observatory/metrics.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -46,7 +47,7 @@ function clean(value, max = 300) { return String(value ?? '').trim().slice(0, ma
 function withQuality(p) { normalizeActivity(p);for(const workflow of p.workflows||[])workflow.stale=workflowIsStale(p,workflow);const changeProposals=(p.changeProposals||[]).map(({proposedContent,...proposal})=>proposal);return { ...p, changeProposals, quality: evaluateQuality(p.checks,p.type) }; }
 async function updateProjects(projectStore,mutator){const apply=async records=>{const prior=new Map(records.map(project=>[project.id,new Set(project.activity||[])]));const result=await mutator(records);const actor=requestContext.getStore()?.actor;if(actor)for(const project of records)for(const event of project.activity||[])if(!prior.get(project.id)?.has(event))event.actor=actor;for(const project of records)normalizeActivity(project);return result;};if(typeof projectStore.update==='function')return projectStore.update(apply);const records=await projectStore.all();const result=await apply(records);await projectStore.save(records);return result;}
 
-export function createAppServer({ projectStore = store, authService=auth, dataDirectory=path.resolve(process.env.AGENCYOS_DATA_DIR||'data'), agentRunner = runCodex, claudeRunner = runClaudeCode, antigravityRunner = runAntigravity, renderedRunner = auditRenderedRepository, performanceRunner = auditRenderedPerformance, visualReviewRunner=auditVisualReview } = {}) {
+export function createAppServer({ projectStore = store, authService=auth, dataDirectory=path.resolve(process.env.AGENCYOS_DATA_DIR||'data'), observatory = new AgentObservatory(), agentRunner = runCodex, claudeRunner = runClaudeCode, antigravityRunner = runAntigravity, renderedRunner = auditRenderedRepository, performanceRunner = auditRenderedPerformance, visualReviewRunner=auditVisualReview } = {}) {
  const executionEngine = new ExecutionEngine({ runners: { codex: agentRunner, 'claude-code': claudeRunner, antigravity: antigravityRunner } });
  const serverInstanceId=randomUUID();let recoveryPromise;
  const recoverRuns=()=>{if(!recoveryPromise)recoveryPromise=updateProjects(projectStore,records=>{for(const project of records){for(const run of project.agentRuns||[])if(run.status==='running'&&run.serverInstanceId!==serverInstanceId){const at=new Date().toISOString();run.status='orphaned';run.completedAt=at;run.error='AgencyOS restarted or lost the run owner; final agent process outcome is unknown. Inspect the repository before retrying.';run.events??=[];run.events.push({type:'run.orphaned',text:run.error,at});project.activity.unshift({at,text:`Codex run outcome unknown: ${run.id}`});}for(const session of project.executionSessions||[])if(session.status==='running'){session.status='failed';session.error='AgencyOS restarted; in-flight execution session interrupted.';session.completedAt=new Date().toISOString();}for(const proposal of project.changeProposals||[])if(proposal.status==='applying'){proposal.status='unknown';proposal.error='AgencyOS restarted while applying this proposal. Inspect the target file before taking further action.';proposal.updatedAt=new Date().toISOString();}}}).catch(error=>{recoveryPromise=null;throw error;});return recoveryPromise;};
@@ -67,6 +68,12 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
     if (route === '/api/agents' && method === 'GET') return send(res, 200, agents);
     if (route === '/api/skills' && method === 'GET') return send(res, 200, skills);
     if (route === '/api/providers' && method === 'GET') return send(res, 200, providers);
+    if (route === '/api/observatory/metrics' && method === 'GET') return send(res, 200, observatory.getMetrics());
+    if (route === '/api/observatory/events' && method === 'POST') {
+      const input = await body(req);
+      const event = await observatory.recordEvent(input);
+      return send(res, 201, event);
+    }
     const proposalRoute=route.match(/^\/api\/projects\/([\w-]+)\/change-proposals(?:\/([\w-]+)\/apply)?$/);
     if(proposalRoute&&method==='POST'&&!proposalRoute[2]){const [,id]=proposalRoute;const input=await body(req,300_000);const project=(await projectStore.all()).find(item=>item.id===id);if(!project)return send(res,404,{error:'Project not found.'});const proposal=await createChangeProposal(project.repositoryPath,input);const saved=await updateProjects(projectStore,records=>{const current=records.find(item=>item.id===id);if(!current)return false;current.changeProposals??=[];current.changeProposals.unshift(proposal);current.activity.unshift({at:proposal.createdAt,text:`Change proposal created: ${proposal.path}`});return true;});if(!saved)return send(res,404,{error:'Project not found.'});const {proposedContent,...review}=proposal;return send(res,201,review);}
     if(proposalRoute&&method==='GET'&&!proposalRoute[2]){const project=(await projectStore.all()).find(item=>item.id===proposalRoute[1]);if(!project)return send(res,404,{error:'Project not found.'});return send(res,200,(project.changeProposals||[]).map(({proposedContent,...proposal})=>proposal));}
