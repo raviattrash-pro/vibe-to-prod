@@ -30,7 +30,12 @@ At the start of project discovery, before starting development, when a new produ
 5. Analyze pricing sensitivity: simulate reactions at 50%, 100%, and 150% of the target price to determine the revenue-maximizing price point.
 6. Identify the top 3 product and positioning bottlenecks (e.g., confusing value metric, lack of integration with existing stack, perceived high switching cost).
 7. Formulate 3 concrete pivots/remedies (repackaging, tiering, or narrowing to a specific niche) and re-test the cohort to observe delta in conversion.
-8. Issue a final project feasibility verdict: 'GREEN / BUILD' (conversion > 40%), 'AMBER / PIVOT' (requires proposition adjustment), or 'RED / DO NOT START' (fundamental lack of demand or willingness to pay).
+8. Issue a project feasibility verdict grounded in evidence tiers:
+   - Separate synthetic hypotheses from competitor research, public market signals, real customer interviews, landing page smoke tests, waitlist conversions, and actual telemetry.
+   - For simulated personas only, label conversion strictly as exploratory hypothesis (max confidence 20%). NEVER present synthetic behavior as measured market demand.
+   - Never invent conversion probabilities or claim statistical significance without real supporting data.
+   - List explicit assumptions, unknowns, and recommended real-world experiments.
+   - Issue verdict: 'HIGH_RISK_UNVALIDATED', 'EARLY_SIGNAL_NEEDS_VALIDATION', 'VALIDATED_EARLY_TRACTION', or 'PROVEN_MARKET_FIT'.
 
 ## Avoid
 

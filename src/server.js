@@ -23,6 +23,7 @@ import { buildDigitalTwinGraph } from './twin/graph.js';
 import { analyzeChangeImpact } from './twin/impact.js';
 import { runBrowserQaSuite } from './qa/browser.js';
 import { runAttackSimulation } from './security/attack-lab.js';
+import { evaluateMarketReality } from './validation/reality-check.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -183,6 +184,60 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
         return true;
       });
       return send(res, 201, { check, quality, report: result });
+    }
+    const realityCheckMatch = route.match(/^\/api\/projects\/([\w-]+)\/reality-check$/);
+    if (realityCheckMatch && method === 'POST') {
+      const [, id] = realityCheckMatch;
+      const input = await body(req);
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const result = evaluateMarketReality({
+        projectName: project.name,
+        concept: input.concept || project.objective,
+        valueProposition: input.valueProposition || '',
+        pricing: input.pricing || null,
+        data: input.data || {}
+      });
+      const createdAt = new Date().toISOString();
+      const check = {
+        id: randomUUID(),
+        category: 'architecture',
+        title: 'Market Reality Check & Demand Evidence',
+        status: result.verdict === 'HIGH_RISK_UNVALIDATED' ? 'fail' : result.hasStatisticalSignificance ? 'pass' : 'unverified',
+        score: result.marketEvidenceScore,
+        evidence: result.evidence,
+        critical: false,
+        verification: 'automated',
+        source: 'reality-check',
+        provenance: {
+          kind: 'automated',
+          evaluatorId: 'reality-check',
+          evaluatorVersion: '1.0.0',
+          capturedAt: createdAt,
+          execution: 'empirical-validation-engine'
+        },
+        resultDetails: {
+          verdict: result.verdict,
+          verdictSummary: result.verdictSummary,
+          hasStatisticalSignificance: result.hasStatisticalSignificance,
+          tiers: result.tiers,
+          assumptions: result.assumptions,
+          unknowns: result.unknowns,
+          recommendedExperiments: result.recommendedExperiments
+        },
+        createdAt
+      };
+      let quality, recorded;
+      await updateProjects(projectStore, projects => {
+        const current = projects.find(p => p.id === id);
+        if (!current) return false;
+        recorded = recordEvaluation(current, check);
+        current.updatedAt = createdAt;
+        current.activity.unshift({ at: createdAt, text: `Market Reality Check: ${result.verdict} (Score: ${result.marketEvidenceScore}/100)` });
+        quality = evaluateQuality(current.checks, current.type);
+        return true;
+      });
+      return send(res, 201, { check, quality, evaluation: result });
     }
     const evaluationHistoryMatch=route.match(/^\/api\/projects\/([\w-]+)\/evaluations\/history$/);
     if(evaluationHistoryMatch&&method==='GET'){const project=(await projectStore.all()).find(p=>p.id===evaluationHistoryMatch[1]);return project?send(res,200,project.evaluationHistory||[]):send(res,404,{error:'Project not found.'})}
