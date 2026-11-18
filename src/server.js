@@ -19,6 +19,8 @@ import { applyChangeProposal, createChangeProposal } from './proposals.js';
 import { ExecutionEngine } from './execution/engine.js';
 import { createExecutionSession } from './execution/state.js';
 import { auditProjectTrustEvidence, computeRepositoryFingerprint } from './trust/evidence-engine.js';
+import { buildDigitalTwinGraph } from './twin/graph.js';
+import { analyzeChangeImpact } from './twin/impact.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -127,6 +129,23 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
       const currentFingerprint = await computeRepositoryFingerprint(project.repositoryPath);
       const audit = auditProjectTrustEvidence(project, currentFingerprint);
       return send(res, 200, audit);
+    }
+    const twinMatch = route.match(/^\/api\/projects\/([\w-]+)\/twin(?:\/(impact))?$/);
+    if (twinMatch) {
+      const [, id, sub] = twinMatch;
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+
+      if (method === 'GET' && !sub) {
+        const graph = await buildDigitalTwinGraph(project.repositoryPath, project);
+        return send(res, 200, graph);
+      }
+      if (method === 'POST' && sub === 'impact') {
+        const input = await body(req);
+        const graph = await buildDigitalTwinGraph(project.repositoryPath, project);
+        const impact = analyzeChangeImpact(graph, input.changedFiles || [], project.decisions || []);
+        return send(res, 200, impact);
+      }
     }
     const executionsMatch = route.match(/^\/api\/projects\/([\w-]+)\/executions(?:\/([\w-]+)(?:\/(approve|cancel))?)?$/);
     if (executionsMatch) {
