@@ -18,6 +18,7 @@ import { qualityReportMarkdown } from './reports.js';
 import { applyChangeProposal, createChangeProposal } from './proposals.js';
 import { ExecutionEngine } from './execution/engine.js';
 import { createExecutionSession } from './execution/state.js';
+import { auditProjectTrustEvidence, computeRepositoryFingerprint } from './trust/evidence-engine.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -119,6 +120,14 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
     }
     const runStatusMatch=route.match(/^\/api\/projects\/([\w-]+)\/agents\/runs\/([\w-]+)$/);
     if(runStatusMatch&&method==='GET'){const [,id,runId]=runStatusMatch;const project=(await projectStore.all()).find(p=>p.id===id);if(!project)return send(res,404,{error:'Project not found.'});const run=project.agentRuns?.find(r=>r.id===runId);return run?send(res,200,run):send(res,404,{error:'Agent run not found.'})}
+    const trustMatch = route.match(/^\/api\/projects\/([\w-]+)\/trust$/);
+    if (trustMatch && method === 'GET') {
+      const project = (await projectStore.all()).find(p => p.id === trustMatch[1]);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const currentFingerprint = await computeRepositoryFingerprint(project.repositoryPath);
+      const audit = auditProjectTrustEvidence(project, currentFingerprint);
+      return send(res, 200, audit);
+    }
     const executionsMatch = route.match(/^\/api\/projects\/([\w-]+)\/executions(?:\/([\w-]+)(?:\/(approve|cancel))?)?$/);
     if (executionsMatch) {
       const [, id, sessionId, subAction] = executionsMatch;
