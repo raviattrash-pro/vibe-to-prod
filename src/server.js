@@ -26,6 +26,7 @@ import { runAttackSimulation } from './security/attack-lab.js';
 import { evaluateMarketReality } from './validation/reality-check.js';
 import { generateScaleForecast } from './forecaster/scale.js';
 import { executeDeploymentRehearsal } from './deployment/rehearsal.js';
+import { generateProductionPassport, formatPassportMarkdown } from './passport/generator.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -351,6 +352,49 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
         return true;
       });
       return send(res, 201, { check, quality, rehearsal });
+    }
+    const passportJsonMatch = route.match(/^\/api\/projects\/([\w-]+)\/passport\.json$/);
+    if (passportJsonMatch && method === 'GET') {
+      const [, id] = passportJsonMatch;
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const passport = await generateProductionPassport(project);
+      return send(res, 200, passport);
+    }
+    const passportMdMatch = route.match(/^\/api\/projects\/([\w-]+)\/passport\.md$/);
+    if (passportMdMatch && method === 'GET') {
+      const [, id] = passportMdMatch;
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const passport = await generateProductionPassport(project);
+      const markdown = formatPassportMarkdown(passport);
+      res.writeHead(200, {
+        'content-type': 'text/markdown; charset=utf-8',
+        'cache-control': 'no-store',
+        'x-content-type-options': 'nosniff'
+      });
+      return res.end(markdown);
+    }
+    const passportPostMatch = route.match(/^\/api\/projects\/([\w-]+)\/passport$/);
+    if (passportPostMatch && method === 'POST') {
+      const [, id] = passportPostMatch;
+      const input = await body(req);
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const passport = await generateProductionPassport(project, {
+        commitHash: input.commitHash || '',
+        buildVersion: input.buildVersion || '',
+        releaseTag: input.releaseTag || ''
+      });
+      const createdAt = new Date().toISOString();
+      await updateProjects(projectStore, projects => {
+        const current = projects.find(p => p.id === id);
+        if (!current) return false;
+        current.updatedAt = createdAt;
+        current.activity.unshift({ at: createdAt, text: `Production Passport generated: ${passport.releaseMetadata.releaseTag} (Score: ${passport.qualityScorecard.score}/100, Ready: ${passport.qualityScorecard.releaseReady})` });
+        return true;
+      });
+      return send(res, 201, { passport });
     }
     const evaluationHistoryMatch=route.match(/^\/api\/projects\/([\w-]+)\/evaluations\/history$/);
     if(evaluationHistoryMatch&&method==='GET'){const project=(await projectStore.all()).find(p=>p.id===evaluationHistoryMatch[1]);return project?send(res,200,project.evaluationHistory||[]):send(res,404,{error:'Project not found.'})}
