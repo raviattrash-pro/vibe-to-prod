@@ -1,12 +1,12 @@
 # 🚀 vibe-to-prod
 
-> **Turn AI-generated code into agency-grade software.**
-> *Pre-build customer simulation, vibe-security auditing, DESIGN.md extraction, and automated quality gates for Codex, Claude Code & Antigravity.*
+> **The Next-Generation AI Engineering Operating System.**  
+> *Transforming AI vibe coding into observable, tested, secured, cost-forecasted, and production-ready software.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node: >=20](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](https://nodejs.org)
-[![Tests: 49 Passing](https://img.shields.io/badge/tests-49%20passing-success.svg)]()
-[![Security: 0 Vulnerabilities](https://img.shields.io/badge/security-0%20vulnerabilities-brightgreen.svg)]()
+[![Tests: 100 Passing](https://img.shields.io/badge/tests-100%20passing-success.svg)]()
+[![Security: Verified Zero--Bypass](https://img.shields.io/badge/security-zero--bypass%20evidence-brightgreen.svg)]()
 
 ---
 
@@ -14,26 +14,32 @@
 
 - [The Problem: The Vibe Coding Trap](#-the-problem-the-vibe-coding-trap)
 - [What is vibe-to-prod?](#-what-is-vibe-to-prod)
-- [Why vibe-to-prod?](#-why-vibe-to-prod)
+- [The 10 Strategic Priorities (Next-Gen OS Kernel)](#-the-10-strategic-priorities-next-gen-os-kernel)
+  - [Priority 1: Real Agent Execution Engine](#priority-1--real-agent-execution-engine)
+  - [Priority 2: Evidence Trust Engine](#priority-2--evidence-trust-engine)
+  - [Priority 3: Engineering Digital Twin](#priority-3--engineering-digital-twin)
+  - [Priority 4: Autonomous Browser QA](#priority-4--autonomous-browser-qa)
+  - [Priority 5: Attack Simulation Lab](#priority-5--attack-simulation-lab)
+  - [Priority 6: Reality Check Engine](#priority-6--reality-check-engine)
+  - [Priority 7: Cost and Scale Forecaster](#priority-7--cost-and-scale-forecaster)
+  - [Priority 8: Deployment Rehearsal](#priority-8--deployment-rehearsal)
+  - [Priority 9: Production Passport](#priority-9--production-passport)
+  - [Priority 10: Agent Reliability Observatory](#priority-10--agent-reliability-observatory)
 - [High-Level Design (HLD)](#-high-level-design-hld)
 - [Low-Level Design (LLD)](#-low-level-design-lld)
 - [The 17-Skill Intelligence Suite](#-the-17-skill-intelligence-suite)
-- [How It Works: Step-by-Step Flow](#-how-it-works-step-by-step-flow)
+- [Quality Engine & 100-Point Scoring Model](#-quality-engine--100-point-scoring-model)
 - [Quick Start & Installation](#-quick-start--installation)
-  - [Run Locally](#run-locally)
-  - [Run with Docker Compose](#run-with-docker-compose)
-  - [Install into Any Project](#install-into-any-project)
-- [Quality Engine & 100-Point Model](#-quality-engine--100-point-model)
 - [Verification & Testing](#-verification--testing)
-- [Roadmap & Contributing](#-roadmap--contributing)
+- [License](#-license)
 
 ---
 
 ## 🛑 The Problem: The Vibe Coding Trap
 
-With the explosion of AI coding assistants (Claude Code, OpenAI Codex, Cursor, Antigravity, GitHub Copilot), anyone can generate a full-stack application in a few prompts. This phenomenon is called **vibe coding**.
+With the explosion of autonomous AI coding agents (Claude Code, OpenAI Codex, Cursor, Antigravity, GitHub Copilot), anyone can generate thousands of lines of full-stack code in a single prompt session. This phenomenon is called **vibe coding**.
 
-However, shipping vibe-coded projects to production introduces massive hidden liabilities:
+However, shipping raw vibe-coded projects to production introduces critical engineering and business liabilities:
 
 ```mermaid
 flowchart LR
@@ -44,93 +50,136 @@ flowchart LR
     C --> F["❌ Zero Test Coverage & Flaky Logic"]
     C --> G["❌ Generic Purple-Gradient AI UI"]
     C --> H["❌ Zero Market Demand (Built for Nobody)"]
+    C --> I["❌ Cloud Cost Runaway (Unbudgeted LLM Calls)"]
     
     style D fill:#ef4444,color:#fff
     style E fill:#ef4444,color:#fff
     style F fill:#ef4444,color:#fff
     style G fill:#ef4444,color:#fff
     style H fill:#ef4444,color:#fff
+    style I fill:#ef4444,color:#fff
 ```
 
 ### The Hard Truths:
-1. **Unvalidated Ideas:** Founders spend weeks vibe-coding complex features only to find zero users want to pay for them.
-2. **Leaked Credentials:** Agents frequently commit `.env` files, hardcode AWS/Stripe keys into React/Vite source files, or prefix sensitive keys with `NEXT_PUBLIC_` / `VITE_`.
-3. **Client-Side-Only Security:** Agents write form validation and auth guards in the frontend, leaving the backend API completely exposed to direct manipulation.
+1. **Unvalidated Hypotheses:** Founders spend weeks vibe-coding complex features only to discover zero users are willing to pay for them.
+2. **Leaked Credentials:** Agents frequently commit `.env` secrets, hardcode Stripe or cloud keys into frontend bundles, or prefix sensitive keys with `NEXT_PUBLIC_` / `VITE_`.
+3. **Client-Side-Only Security:** Agents write form validation and auth guards in the frontend, leaving backend mutation APIs exposed to unauthorized direct execution.
 4. **Context Rot & Drift:** As conversation tokens grow beyond 50k, the AI loses focus, contradicts its own architectural decisions, and introduces silent regressions.
-5. **Interview & Presentation Blindspots:** Developers who vibe-code an app often cannot explain time complexity, memory implications, or trade-offs when questioned in client reviews or tech interviews.
+5. **Interview & Presentation Blindspots:** Developers who vibe-code an app often cannot explain time complexity, database queries, or security boundaries when questioned by clients, investors, or interviewers.
 
 ---
 
 ## 💡 What is vibe-to-prod?
 
-**`vibe-to-prod`** is an **engineering operating system and quality kernel** that wraps around your AI coding agents. It ensures that every line of code generated by an AI model adheres to the standards of a staff-level engineering team before it is ever merged or deployed.
+**`vibe-to-prod`** is an **AI Engineering Operating System** that wraps around autonomous AI coding agents. It ensures that every line of code generated by an AI model adheres to the standards of a staff-level engineering team before it is ever merged or deployed.
 
-It operates in two connected parts:
-- **Core Engine:** 17 provider-independent skills, evidence-backed quality verification, synthetic customer simulation, and automated release gates compatible with **Codex**, **Claude Code**, and **Gemini/Antigravity**.
-- **Studio Interface:** An observable, real-time web dashboard (and installable PWA) for tracking tasks, visualizing quality scores, reviewing diff proposals, and managing releases.
+It operates in three interconnected layers:
+- **Core Operating System Kernel (`src/`):** Real agent execution, evidence trust engine, continuous digital twin, autonomous browser QA, attack simulation, empirical reality checks, scale forecasting, staging rehearsal, release passports, and observability.
+- **17-Skill Intelligence Suite (`skills/` & `.agents/skills/`):** Provider-independent skills compatible with **Codex**, **Claude Code**, and **Gemini / Antigravity**.
+- **Studio Interface (`public/`):** An observable, real-time web dashboard (and installable PWA) for tracking tasks, visualizing quality scores, reviewing diff proposals, and releasing software.
 
 ---
 
-## 🎯 Why vibe-to-prod?
+## 🎯 The 10 Strategic Priorities (Next-Gen OS Kernel)
 
-| Traditional AI Generation (Vibe Coding) | vibe-to-prod Operating Model |
-| :--- | :--- |
-| **Starts coding immediately** without market validation | **Simulates 100 customer personas** first: gives a definitive Build vs Kill verdict |
-| **Client-side only validation** & exposed `.env` keys | **Vibe-Code Security Audit** scans git history, headers, and client bundles |
-| **Generic, template-like UI** with repetitive gradients | **`DESIGN.md` extraction** & 30+ visual styles (Bento, Brutalism, Glassmorphism) |
-| **Unbounded, single-turn prompts** causing context rot | **Structured Plan-Execute-Verify loops** with phase handoffs |
-| **Self-congratulatory AI claims** ("Everything is tested!") | **Evidence-backed scoring**: claims score 0 points without verifiable logs |
-| **Developer can't explain** how the system works | **5-Agent Interview Panel** grills the developer so they master their own code |
+### Priority 1 — Real Agent Execution Engine
+*No fabricated agent runs. Real execution, real status, real observability.*
+- **DAG Topological Ordering:** Resolves task dependencies and schedules execution in topological order with circular dependency detection.
+- **Idempotency Keys:** Deterministic idempotency keys prevent duplicate task execution.
+- **Approval Checkpoints:** Pauses execution at human-in-the-loop checkpoints until explicitly approved via API or Studio.
+- **Context Handoff:** Cryptographic SHA-256 context hashing passes state safely between workflow phases.
+- **Exponential Backoff:** Configurable retry policies with jitter and cancellation handling.
+
+### Priority 2 — Evidence Trust Engine
+*A text description must never be sufficient to prove an automated check passed.*
+- **Repository Fingerprinting:** Deterministic SHA-256 hashing detects uncommitted changes and code drift.
+- **7-State Verification Taxonomy:** Explicitly distinguishes `verified`, `partially_verified`, `user_reported`, `unverified`, `failed`, `not_applicable`, and `stale`.
+- **Zero-Bypass Policy:** Automated checks score **0 points** unless backed by a verifiable artifact, raw log, or machine exit code.
+
+### Priority 3 — Engineering Digital Twin
+*Continuously updated graph representation of target application health.*
+- **Graph Topology:** Extracts modules, components, API endpoints, database entities, dependencies, security boundaries, ADRs, and tests.
+- **7-Step Change Impact Analysis:** On any code change, identifies affected modules, impacted APIs, related tests, threatened boundaries, violated ADRs, and recommends the smallest verification test suite.
+
+### Priority 4 — Autonomous Browser QA
+*Playwright-powered route discovery and critical journey verification.*
+- **Automated Discovery:** Crawls static routes, client-side router declarations, and interactive forms.
+- **Responsive Multi-Breakpoint Captures:** Captures visual proof at 360px (mobile), 768px (tablet), and 1280px (desktop).
+- **Accessibility & Bug Reports:** Discovers missing ARIA labels, unlabelled inputs, and generates reproducible bug reports.
+
+### Priority 5 — Attack Simulation Lab
+*Safe, authorized security verification before deployment.*
+- **Security Headers:** Audits CSP (`unsafe-inline`, `unsafe-eval`), HSTS, X-Content-Type-Options, X-Frame-Options, and dangerous CORS wildcard credentials.
+- **Boundary & IDOR Testing:** Tests unauthenticated mutation access and cross-tenant direct object references.
+- **CSRF & Session Security:** Verifies CSRF token enforcement and cookie attributes (`HttpOnly`, `Secure`, `SameSite`).
+- **Production Guard:** Intrusive tests are strictly prohibited against production without explicit `allowProduction: true` confirmation.
+
+### Priority 6 — Reality Check Engine
+*Separating synthetic hypotheses from empirical customer demand.*
+- **7-Tier Evidence Hierarchy:**
+  1. `synthetic_hypotheses` (Max confidence 20%, strictly exploratory)
+  2. `competitor_research`
+  3. `public_market_evidence`
+  4. `real_customer_interviews`
+  5. `landing_page_experiments`
+  6. `waitlist_conversion`
+  7. `actual_purchase_and_usage` (Gold standard)
+- **Anti-Fabrication Guard:** Never invents conversion probabilities or claims statistical significance without sample sizes >= 100 real visitors or 30 paying users.
+
+### Priority 7 — Cost and Scale Forecaster
+*Deterministic capacity and cloud burn modeling based on verified public rates.*
+- **Multi-Scale Modeling:** Simulates 100, 1,000, 10,000, and 100,000 active users.
+- **7 Resource Dimensions:** API requests, database operations, storage, bandwidth egress, background worker jobs, AI inference tokens, and compute hosting.
+- **Bottleneck Detection:** Flags database connection pool limits at 10k users and un-cached LLM spend dominance at 100k users with clear architecture evolution paths.
+
+### Priority 8 — Deployment Rehearsal
+*Staging pre-flight drill before releasing to production.*
+- **Checkpoints:** Configuration validation, secret leak scan, reversible migration down check, backup freshness verification (< 24h RPO), health endpoint probes, and downstream dependency checks.
+- **Release Risk Scorecard:** Outputs `releaseReady: boolean`, `riskLevel: 'low' | 'medium' | 'high' | 'critical'`, and active blockers.
+
+### Priority 9 — Production Passport
+*Reproducible, machine-readable and audit-ready release evidence package.*
+- **Complete SBOM:** Full Software Bill of Materials with licenses and dependency breakdown.
+- **Attestation Signature:** Signed with a cryptographic SHA-256 hash of the canonical release record.
+- **Dual Export:** Available in machine-readable JSON (`passport.json`) and audit-ready Markdown (`passport.md`).
+
+### Priority 10 — Agent Reliability Observatory
+*Continuous telemetry tracking orchestration and agent reliability.*
+- **Telemetry Metrics:** Success rate, task completion time, retry frequency, tool errors, context handoff failures, token cost, human interventions, and quality delta.
+- **Skill Reliability Rankings:** Identifies underperforming skills (`rock_solid`, `stable`, `flaky`, `critical_attention`) to pinpoint prompt regressions.
 
 ---
 
 ## 🏗️ High-Level Design (HLD)
 
-`vibe-to-prod` acts as the supervisory orchestrator between the user, their workspace, and autonomous coding agents:
-
 ```mermaid
 flowchart TD
-    subgraph ClientLayer["User & Presentation Layer"]
-        User["Developer / Founder"]
-        Studio["AgencyOS Studio (Web & PWA / Port 4173)"]
-        CLI["CLI Commands (npm run install:project)"]
+    subgraph ClientLayer ["Client & Management Layer"]
+        Studio["AgencyOS Studio PWA (public/)"]
+        CLI["Agent Adapters (Codex, Claude Code, Antigravity)"]
     end
 
-    subgraph CoreEngine["vibe-to-prod Orchestration Kernel"]
-        API["Fastify / Node HTTP Server (src/server.js)"]
-        Store["Persistence Engine (JSON Store / PostgreSQL Store)"]
-        Orchestrator["Workflow & Routing Engine (src/orchestrator.js)"]
-        Quality["100-Point Quality Engine (src/quality.js)"]
-        Evidence["Evidence & Provenance Registry (src/evidence.js)"]
-        Proposal["Atomic Diff & Proposal Engine (src/proposals.js)"]
+    subgraph CoreEngine ["Operating System Core (src/server.js)"]
+        ExecEngine["Priority 1: Execution Engine"]
+        TrustEngine["Priority 2: Evidence Trust Engine"]
+        TwinEngine["Priority 3: Digital Twin & Impact"]
+        BrowserQA["Priority 4: Autonomous Browser QA"]
+        AttackLab["Priority 5: Attack Simulation Lab"]
+        RealityCheck["Priority 6: Reality Check Engine"]
+        Forecaster["Priority 7: Scale & Cost Forecaster"]
+        Rehearsal["Priority 8: Deployment Rehearsal"]
+        Passport["Priority 9: Production Passport"]
+        Observatory["Priority 10: Reliability Observatory"]
     end
 
-    subgraph IntelligenceLayer["17-Skill Intelligence Suite (.agents/skills)"]
-        PreBuild["Pre-Build Gate (Synthetic Customer Simulator)"]
-        SecSkills["Security (Vibe-Code Security, App Security)"]
-        DesignSkills["Design (DESIGN.md Extraction, 30+ Styles Catalog)"]
-        ArchSkills["Architecture (HLD, Offline-First, Performance)"]
-        QASkills["Quality Assurance (Testing Strategy, Release Readiness)"]
-        PostBuild["Post-Build Defense (5-Agent Interview Panel)"]
+    subgraph StorageLayer ["Persistence & Governance Layer"]
+        Store["File Store / PostgreSQL JSONB Store (src/store.js)"]
+        Auth["Auth & CSRF Guard (src/auth.js)"]
+        QualityModel["100-Point Transparent Quality Model (src/quality.js)"]
     end
 
-    subgraph AgentRuntimes["Autonomous Agent Runtimes"]
-        Codex["OpenAI Codex (AGENTS.md)"]
-        Claude["Claude Code (.claude/skills/ + CLAUDE.md)"]
-        Antigravity["Antigravity / Gemini CLI (.agents/skills/ + GEMINI.md)"]
-    end
-
-    User --> Studio
-    User --> CLI
-    Studio <--> API
-    CLI --> Orchestrator
-    API <--> Store
-    API <--> Orchestrator
-    API <--> Quality
-    Quality <--> Evidence
-    Orchestrator --> IntelligenceLayer
-    IntelligenceLayer --> AgentRuntimes
-    Proposal --> Store
+    ClientLayer --> CoreEngine
+    CoreEngine --> StorageLayer
 ```
 
 ---
@@ -139,197 +188,120 @@ flowchart TD
 
 ### 1. Data Models & Store
 - **Local Mode (`src/store.js`):** Lightweight JSON storage engine utilizing atomic file renaming with serialized mutation queues to eliminate file lock contention.
-- **Enterprise Mode (`src/postgres-store.js`):** PostgreSQL JSONB backend for multi-user teams, supporting transaction-safe updates, RBAC, and signed 8-hour sessions with scrypt password hashing.
+- **PostgreSQL Mode (`src/postgres-store.js`):** JSONB storage with advisory locking for multi-instance deployments, signed 8-hour sessions, and scrypt password hashing.
 
-### 2. Workflow Routing Engine (`src/orchestrator.js` & `references/workflow-routing.json`)
-The orchestrator dynamically routes tasks into dependency-ordered DAGs based on project intent:
+### 2. DAG Execution Engine (`src/execution/`)
 ```
-Project Created ──> Foundation / Repository Audit
-                         │
-                         ▼
-        ┌────────────────┴────────────────┐
-        ▼                                 ▼
-Pre-Build Customer Sim          Architecture / HLD
-        │                                 │
-        ▼                                 ▼
-Design Intelligence / DESIGN.md ──> Implementation / Coding
-                                          │
-                                          ▼
-                               Vibe-Code Security Audit
-                                          │
-                                          ▼
-                                Testing & Performance
-                                          │
-                                          ▼
-                                   Release Readiness
-                                          │
-                                          ▼
-                            Multi-Agent Interview Panel
+Workflow Initialized
+        │
+        ▼
+Dependency Graph (Topological Sorter)
+        │
+        ├─► Task 1 (Foundation) ──► Context Handoff Hash
+        │                                  │
+        ▼                                  ▼
+Approval Checkpoint? ──(Yes)──► Paused ──(Approved)──► Task 2 (Implementation)
+        │
+        ▼
+Execution Metrics & Telemetry Recorded
 ```
-
-### 3. Change Proposal & Remediation Engine (`src/proposals.js`)
-- Code remediations are never applied silently.
-- Single-file unified diff proposals are generated with cryptographic SHA-256 fingerprints.
-- The engine checks original file hashes prior to atomic patching to prevent race conditions or stale writes.
 
 ---
 
 ## 🧠 The 17-Skill Intelligence Suite
 
-Every skill is a standalone, discoverable markdown specification accompanied by validation criteria, input requirements, actionable procedures, and explicit anti-patterns:
+All skills are located in `skills/` and synchronized to `.agents/skills/` (Codex/Antigravity) and `.claude/skills/` (Claude Code):
 
-```
-.agents/skills/
-├── agencyos/                     # Master orchestrator & 6-phase engineering lifecycle
-├── synthetic-customer-simulator/ # 100 synthetic customer persona validation (Build vs Kill)
-├── vibe-code-security/           # Catches leaked API keys, .env commits, prompt injection
-├── agent-workflow-orchestration/ # Plan-execute-verify loops, context rot mitigation
-├── design-reference-extraction/  # Generates binding DESIGN.md from reference URLs
-├── design-styles-catalog/        # 30+ visual styles (Bento, Neumorphism, Brutalism)
-├── repository-audit/             # Codebase reconnaissance, lockfile and script audit
-├── hld/                          # High-level architecture, C4 diagrams, ADR records
-├── design-intelligence/          # WCAG AA contrast tokens, typography, responsive grids
-├── application-security/         # Threat modeling, OWASP Top 10, CORS, auth guards
-├── seo/                          # Technical SEO, JSON-LD schema, robots.txt, sitemaps
-├── performance/                  # Core Web Vitals (LCP, INP, CLS), bundle size budgets
-├── offline-first/                # IndexedDB/Cache API sync, conflict resolution
-├── pwa-mobile-app/               # Manifest, 192px/512px icons, scoped service worker
-├── testing-strategy/             # Testing pyramid, critical journey test execution
-├── release-readiness/            # Pre-flight gate checklist with go/no-go recommendation
-└── multi-agent-interview-panel/  # 5-agent technical interview grill for portfolio defense
-```
+| Skill Name | Role | Primary Capability |
+| :--- | :--- | :--- |
+| **synthetic-customer-simulator** | Product Discovery | Stress-tests concepts across customer personas with strict evidence tiers |
+| **vibe-security-audit** | DevSecOps | Scans git history, client bundles, and HTTP headers for leaked secrets |
+| **design-md-extractor** | UI Architecture | Reverse-engineers design tokens, color systems, and typography into `DESIGN.md` |
+| **multi-agent-interview-panel** | Tech Readiness | 5-agent panel (Architect, SecOps, QA, Product, Senior Dev) grilling the author |
+| **fullstack-architecture** | Staff Architect | Defines clean boundaries, schema definitions, and ADRs |
+| **app-security** | Application Security | Zero-trust authentication, RBAC, CSRF, and SQL injection defenses |
+| **testing-strategy** | QA Director | Enforces unit, integration, and critical user journey tests |
+| **pwa-offline-engine** | Mobile / Offline | Service worker caching, IndexedDB sync, and installable manifests |
+| **responsive-ui** | UI / Accessibility | WCAG AA compliance, semantic HTML, and fluid viewport layouts |
+| **seo-and-social** | Growth | Dynamic OpenGraph images, sitemaps, JSON-LD structured data |
+| **database-modeling** | Database Architect | Third normal form schemas, foreign keys, index optimization |
+| **api-design** | Backend Lead | RESTful standards, error envelope formats, idempotent mutations |
+| **performance-optimization** | Core Web Vitals | LCP < 2.5s, code-splitting, tree-shaking, asset optimization |
+| **animation-interaction** | Motion Designer | CSS transforms, spring physics, reduced-motion media queries |
+| **deployment-delivery** | DevOps Lead | Docker multi-stage builds, healthchecks, zero-downtime rollbacks |
+| **logging-observability** | SRE Lead | Structured JSON logging, correlation IDs, OpenTelemetry hooks |
+| **technical-debt-cleanup** | Senior Refactorer | Eliminates dead code, resolves lint errors, enforces strict types |
 
 ---
 
-## 🔄 How It Works: Step-by-Step Flow
+## 📊 Quality Engine & 100-Point Scoring Model
 
-### Phase 1: Pre-Build Validation
-Before writing code, trigger the **Synthetic Customer Simulator**:
-```bash
-# In your agent session:
-"Validate my idea: A subscription tool that monitors API rate limits for $29/month."
-```
-100 synthetic user personas evaluate pricing elasticity, friction points, and alternative tools, delivering a clear verdict:
-- 🟢 **GREEN / BUILD** (Conversion > 40%)
-- 🟡 **AMBER / PIVOT** (Adjust positioning or price point)
-- 🔴 **RED / DO NOT START** (Save weeks of wasted coding)
+`vibe-to-prod` evaluates software across 12 weighted engineering categories:
 
-### Phase 2: Design Extraction
-Prevent the generic AI look by feeding a reference site to **Design Reference Extraction**:
-```bash
-"Extract design reference from https://linear.app into DESIGN.md"
-```
-Produces a structured, concise `DESIGN.md` containing strict **Do's & Don'ts**, color tokens, typography scales, and padding rules.
+| Category | Weight | Primary Verifications |
+| :--- | :---: | :--- |
+| **Application Security** | 12 | Secret scan, npm audit, Attack Lab simulation |
+| **Architecture & System Design** | 12 | Digital Twin graph, modular boundaries, ADRs |
+| **UI/UX & Visual Design** | 10 | DESIGN.md compliance, visual review captures |
+| **Authentication & AuthZ** | 9 | CSRF protection, session cookie flags, IDOR tests |
+| **Responsive Design & A11y** | 8 | WCAG AA checks, static & rendered accessibility |
+| **Scalability & Reliability** | 8 | Cost & scale forecaster, rate limiting |
+| **SEO & Discoverability** | 8 | Static metadata, canonical URLs, robots checks |
+| **Testing & QA** | 7 | Real Node.js test exit code, Autonomous Browser QA |
+| **Animation & Interaction** | 6 | Motion design, accessible transition controls |
+| **Performance** | 6 | Rendered LCP, DOMContentLoaded, transfer bytes |
+| **Offline & Synchronization** | 5 | Service workers, offline cache manifests |
+| **Deployment & Observability** | 4 | Deployment rehearsal, staging preflight drill |
+| **Total** | **100** | |
 
-### Phase 3: Phased Agent Orchestration
-Break monolithic prompts into structured **Plan-Execute-Verify** loops via `agent-workflow-orchestration`. Each phase operates under a 60% context window ceiling to eliminate context rot.
-
-### Phase 4: Vibe-Code Security Audit
-Audit the generated codebase:
-```bash
-"Run vibe-code-security audit"
-```
-Scans git commit history for accidentally committed `.env` files, inspects client bundles for leaked keys, and verifies server-side route guards.
-
-### Phase 5: Evidence-Backed Quality Score
-Every check requires proof:
-- Automated test output, `npm audit` parser results, or headless screenshot captures.
-- No AI self-assertion is accepted as evidence.
-
-### Phase 6: Multi-Agent Interview Panel
-Once built, get grilled by 5 specialist personas (Architect, Security, PM, QA, Engineering Manager) on your actual code to prepare for technical interviews and presentations.
+> ⚠️ **Zero-Bypass Policy:** A high numerical score does NOT permit release if critical blockers exist. A release is blocked if any critical vulnerability, leaked credential, or broken auth boundary is detected.
 
 ---
 
 ## 🚀 Quick Start & Installation
 
-### Prerequisites
-- **Node.js**: v20.0.0 or higher
-- **Package Manager**: npm (bundled with Node)
-
-### Run Locally
+### 1. Run Locally
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/raviattrash-pro/vibe-to-prod.git
 cd vibe-to-prod
 
-# 2. Start the local server
+# Install dependencies
+npm install
+
+# Start the server and Studio interface
 npm start
+# Open http://localhost:4173 in your browser
 ```
-Open **`http://localhost:4173`** to access AgencyOS Studio.
 
----
-
-### Run with Docker Compose
+### 2. Run with Docker Compose
 ```bash
-# 1. Prepare environment configuration
-cp .env.example .env
-
-# 2. Launch with PostgreSQL persistence
-docker compose up --build -d
+docker compose up -d
+# Studio is available at http://localhost:4173
 ```
-The application will listen on `http://127.0.0.1:4173` backed by PostgreSQL.
 
----
-
-### Install into Any Existing Project
-Inject the 17 skills and instruction sets into any existing repo:
+### 3. Install Skills into Any Existing Project
 ```bash
-npm run install:project -- "C:\path\to\your-project"
+# Automatically install all 17 skills into your target project
+npm run install:project -- "C:/path/to/your/project"
 ```
-This automatically configures:
-- `.agents/skills/` (for Antigravity / Gemini CLI)
-- `.claude/skills/` (for Claude Code)
-- Managed instruction blocks in `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`.
-
----
-
-## 📊 Quality Engine & 100-Point Model
-
-Every project is evaluated against a transparent 100-point rubric:
-
-| Category | Weight | Description |
-| :--- | :---: | :--- |
-| **Application Security** | 14 | Vulnerabilities, secrets, headers, auth controls |
-| **UI/UX & Visual Design** | 12 | Design system, token consistency, originality |
-| **Responsive & Accessibility** | 10 | WCAG AA contrast, responsive breakpoints, ARIA |
-| **SEO & AI Discoverability** | 10 | Semantic HTML, JSON-LD, crawlability, canonicals |
-| **Architecture & System Design** | 10 | Component boundaries, data flows, ADRs |
-| **Authentication & Authorization** | 8 | Login flows, RBAC, session management, IDOR |
-| **Scalability & Reliability** | 8 | Error handling, graceful degradation |
-| **Testing & QA** | 7 | Test coverage, critical journey suites |
-| **Animation & Interaction** | 6 | Motion design, reduced-motion compliance |
-| **Performance** | 6 | Core Web Vitals (LCP, INP, CLS), bundle size |
-| **Offline & Synchronization** | 5 | Local storage, retry queues, conflict policy |
-| **Deployment & Observability** | 4 | CI/CD, logging, rollback procedures |
-| **Total** | **100** | |
-
-> ⚠️ **Release Blocker Rule:** Regardless of numerical score, release readiness is strictly blocked if any critical security vulnerability (P0/P1), exposed secret, or broken authentication control is identified.
 
 ---
 
 ## 🧪 Verification & Testing
 
-Run the full verification suite:
+Every capability in `vibe-to-prod` is verified with comprehensive unit and integration tests:
+
 ```bash
-# Run 49 unit and integration tests
+# Run 100 unit, integration, and safety tests
 npm test
 
-# Run project integrity and reference validation
+# Run repository integrity validation
 npm run validate
 
-# Sync skills across agent providers
+# Synchronize skills across agent runtimes
 npm run sync:skills
 ```
-
----
-
-## 🗺️ Roadmap
-
-- [x] **v0.1.0:** Core 17-skill suite, local JSON & PostgreSQL stores, Studio PWA, evidence registry.
-- [ ] **v0.2.0:** Headless browser automation for multi-page automated screenshot diffing.
-- [ ] **v0.3.0:** Direct GitHub Actions integration for automated PR quality gate checks.
-- [ ] **v0.4.0:** Interactive terminal UI (TUI) for local CLI agent orchestration.
 
 ---
 

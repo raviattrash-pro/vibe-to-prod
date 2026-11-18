@@ -1,34 +1,114 @@
-# Architecture
+# vibe-to-prod — System Architecture
 
-AgencyOS is split into two layers. **Core** contains domain behavior and provider-neutral capability definitions; **Studio** is a thin client of the Core HTTP API. In this local first release, Node's standard library serves the API and static app, while JSON file persistence keeps setup simple.
+**vibe-to-prod** is a next-generation AI Engineering Operating System that bridges the gap between raw AI-generated code ("vibe coding") and observable, verified, production-grade software.
 
-```text
-Studio (public/)
-   │ JSON over same-origin HTTP
-   ▼
-API (src/server.js)
-   ├── project records and evidence ──► Store (src/store.js)
-   ├── workflow planning ─────────────► Orchestrator (src/orchestrator.js)
-   ├── remediation planning ──────────► Failed/unverified evidence follow-up
-   ├── score and release gates ───────► Quality engine (src/quality.js)
-   ├── bounded local checks ──────────► Evaluators (src/evaluators.js)
-   ├── agent task handoff ────────────► Adapters (src/adapters.js)
-   └── agent + skill registries ──────► agents/ and skills/
+---
+
+## 🏗️ Next-Generation Operating System Topology
+
+```mermaid
+flowchart TD
+    subgraph ClientLayer ["Client & Management Layer"]
+        Studio["AgencyOS Studio PWA (public/)"]
+        CLI["Agent Adapters (Codex, Claude Code, Antigravity)"]
+    end
+
+    subgraph CoreEngine ["Operating System Core (src/server.js)"]
+        ExecEngine["Priority 1: Real Agent Execution Engine (src/execution/)"]
+        TrustEngine["Priority 2: Evidence Trust Engine (src/trust/)"]
+        TwinEngine["Priority 3: Engineering Digital Twin (src/twin/)"]
+        BrowserQA["Priority 4: Autonomous Browser QA (src/qa/)"]
+        AttackLab["Priority 5: Attack Simulation Lab (src/security/)"]
+        RealityCheck["Priority 6: Reality Check Engine (src/validation/)"]
+        Forecaster["Priority 7: Cost & Scale Forecaster (src/forecaster/)"]
+        Rehearsal["Priority 8: Deployment Rehearsal (src/deployment/)"]
+        Passport["Priority 9: Production Passport (src/passport/)"]
+        Observatory["Priority 10: Agent Reliability Observatory (src/observatory/)"]
+    end
+
+    subgraph StorageLayer ["Persistence & Governance Layer"]
+        Store["File Store / PostgreSQL JSONB Store (src/store.js)"]
+        Auth["Auth & CSRF Guard (src/auth.js)"]
+        QualityModel["100-Point Transparent Quality Model (src/quality.js)"]
+    end
+
+    ClientLayer --> CoreEngine
+    CoreEngine --> StorageLayer
 ```
 
-## Decisions and limits
+---
 
-- Local file persistence keeps zero-setup use simple. When `DATABASE_URL` is present, PostgreSQL stores shared projects as JSONB and applies updates in transactions under a database advisory lock, allowing multiple server processes to coordinate. `migrations/001-projects-jsonb.sql` defines the initial schema. PostgreSQL mode is required for non-loopback hosting.
-- Optional environment-configured scrypt password hashes provide eight-hour signed sessions, CSRF tokens, admin/member/viewer roles, and actor labels on new activity events. Authenticated users share one workspace; per-project tenancy, account lifecycle management, and session revocation remain future work.
-- Workflow creation combines a baseline task graph with deterministic, requirement-triggered checks for performance, offline behavior, and animation. The workflow records which rules matched so routing is explainable. AgencyOS generates evidence-oriented handoffs; Codex can be invoked only through an explicit workspace-write confirmation. Runs do not auto-complete workflow tasks.
-- Optional workflow routes live in versioned `references/workflow-routing.json`; each match includes the trigger ID and matched phrase in the task handoff. The validation command checks all route agent, skill, and dependency references.
-- Workflows store a fingerprint of project requirements and decisions. If that context changes, prior plans remain in history but become stale; task handoffs, completion, and agent execution require a new plan.
-- Remediation plans derive actions from failed or unverified checks, retain the originating check identifier, and stay separate from score calculation. They suggest next evidence steps; they do not close checks automatically.
-- The scoring engine computes from check records. User-entered evidence stays user-reported; built-in evaluators attach captured output for the checks they actually run.
-- Built-in check adapters capture output from a bounded secret-marker scan and an explicitly approved Node.js test run. They cover a small part of the quality model and cannot clear release readiness.
-- Provider compatibility uses native skill discovery directories and generated task prompts. Optional Codex CLI invocation relies on the user's existing CLI authentication; Claude Code and Antigravity are currently handoff-only.
-- Loopback binding reduces exposure for local use. Network deployment requires authentication, CSRF defenses, proper secret/config handling, database transactions, backups, and a threat review.
+## 🧩 Architectural Subsystems
 
-## Data shape
+### 1. Real Agent Execution Engine (`src/execution/`)
+- **DAG Topological Sorter (`engine.js`):** Resolves task dependency graphs, checks execution readiness, and detects circular dependency locks.
+- **Idempotency & State (`state.js`):** Unique idempotency keys prevent duplicate runs. Manages session states (`pending`, `running`, `paused_for_approval`, `completed`, `failed`, `cancelled`).
+- **Context Handoff (`handoff.js`):** Cryptographic SHA-256 context hashing passes state safely between workflow phases.
+- **Provider Runner Adapters:** Direct integration with Codex, Claude Code, and Antigravity runners with exponential backoff retries and manual approval checkpoints.
 
-Project records include identity/profile, objective, requirements, technology preferences, priority, local repository, status/timestamps, checks, workflow plans, decisions, agent runs, and activity. Workflow prompts include saved requirements and recent decisions. Each check is tagged to a weighted category, carries status, evidence, provenance, and an optional release-critical flag. Scores are computed on read to avoid stale derived values.
+### 2. Evidence Trust Engine (`src/trust/`)
+- **Content Fingerprinting:** Deterministic SHA-256 repo fingerprinting detects uncommitted code drift.
+- **7-State Verification Taxonomy:**
+  1. `verified` (Automated tool proof with verifiable artifact hash)
+  2. `partially_verified`
+  3. `user_reported`
+  4. `unverified`
+  5. `failed`
+  6. `not_applicable`
+  7. `stale` (Expired TTL or repo modification mismatch)
+- **Anti-Fabrication Zero-Bypass Policy:** Bare text descriptions alone can NEVER prove an automated check passed without machine-verifiable artifact proof.
+
+### 3. Engineering Digital Twin (`src/twin/`)
+- **Knowledge Graph (`graph.js`):** Continuously models dependencies, modules, components, API endpoints, database entities, security boundaries, ADRs, and test suites.
+- **7-Step Change Impact Analyzer (`impact.js`):** Traces git diffs to identify affected modules, impacted APIs, related tests, threatened boundaries, and violated ADRs, recommending the smallest verification suite.
+
+### 4. Autonomous Browser QA (`src/qa/`)
+- **Route & Critical Journey Discovery (`browser.js`):** Discovers static routes, router definitions, form interactions, and auth entrypoints.
+- **Multi-Breakpoint Visual Capture:** Captures responsive screenshots at 360px (mobile), 768px (tablet), and 1280px (desktop).
+- **Accessibility & Bug Reports:** Extracts missing ARIA tags, button names, form labels, and generates structured, reproducible bug reports.
+
+### 5. Attack Simulation Lab (`src/security/`)
+- **Authorized Threat Simulation (`attack-lab.js`):**
+  - Security header audits (CSP, HSTS, X-Content-Type-Options, X-Frame-Options, CORS wildcard with credentials).
+  - Authorization boundaries & IDOR probing.
+  - CSRF protection verification on mutating routes.
+  - Session cookie flags (`HttpOnly`, `Secure`, `SameSite`).
+  - Rate-limit testing under burst traffic.
+  - Adversarial input validation (SQL injection, path traversal, XSS).
+  - File upload controls (extension whitelist, size limits).
+- **Production Guard:** Strictly blocks intrusive testing against production without explicit confirmation.
+
+### 6. Reality Check Engine (`src/validation/`)
+- **Multi-Tier Empirical Market Validation (`reality-check.js`):**
+  - Strictly separates synthetic hypotheses from real customer interviews, competitor research, landing page smoke tests, waitlist conversions, and actual telemetry.
+  - Rejects simulated customer persona behavior as measured market demand (max confidence 20%).
+  - Enforces sample size criteria before claiming statistical significance.
+  - Extracts assumptions, unknowns, and recommended experiments.
+
+### 7. Cost & Scale Forecaster (`src/forecaster/`)
+- **Capacity & Burn Modeling (`scale.js`):**
+  - Models infrastructure at 100, 1,000, 10,000, and 100,000 active users.
+  - Breakdowns for API requests, database operations, storage, bandwidth, background jobs, AI inference, and hosting.
+  - Referenced against verified rate cards (AWS, Cloudflare R2, Neon/Supabase, Anthropic, OpenAI).
+  - Identifies database connection pooling limits and AI spend runaway with architecture evolution roadmaps.
+
+### 8. Deployment Rehearsal (`src/deployment/`)
+- **Pre-Flight Staging Drill (`rehearsal.js`):**
+  - Validates configuration, packaging, and scripts.
+  - Scans for hardcoded secrets and committed keys.
+  - Verifies migration reversible down definitions.
+  - Checks backup availability and RPO freshness (< 24 hours).
+  - Tests health endpoints and downstream service readiness.
+  - Produces a Release Risk Scorecard (`releaseReady`, `riskLevel`, `blockers`).
+
+### 9. Production Passport (`src/passport/`)
+- **Release Evidence Package (`generator.js`):**
+  - Deterministically aggregates project identity, commit hash, build version, SBOM, security findings, test reports, performance measurements, accessibility results, SEO assessment, quality score, known limitations, and deployment/rollback evidence.
+  - Generates machine-readable JSON (`passport.json`) and audit-ready Markdown (`passport.md`).
+  - Cryptographically signs the canonical passport payload with a SHA-256 attestation signature.
+
+### 10. Agent Reliability Observatory (`src/observatory/`)
+- **Execution Telemetry & Benchmark Engine (`metrics.js`):**
+  - Tracks success rate, task duration, failed executions, retry frequency, tool errors, handoff failures, token cost, human interventions, and quality score delta.
+  - Benchmarks providers (Codex, Claude Code, Antigravity).
+  - Ranks skill reliability (`rock_solid`, `stable`, `flaky`, `critical_attention`) and generates prompt/schema improvement diagnostics.
