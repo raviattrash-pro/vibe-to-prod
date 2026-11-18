@@ -21,6 +21,7 @@ import { createExecutionSession } from './execution/state.js';
 import { auditProjectTrustEvidence, computeRepositoryFingerprint } from './trust/evidence-engine.js';
 import { buildDigitalTwinGraph } from './twin/graph.js';
 import { analyzeChangeImpact } from './twin/impact.js';
+import { runBrowserQaSuite } from './qa/browser.js';
 import agents from '../agents/registry.json' with { type: 'json' };
 import skills from '../skills/registry.json' with { type: 'json' };
 
@@ -78,6 +79,53 @@ export function createAppServer({ projectStore = store, authService=auth, dataDi
     if(reviewImageMatch&&method==='GET'){const [,id,reviewId,filename]=reviewImageMatch;const project=(await projectStore.all()).find(item=>item.id===id);if(!project)return send(res,404,{error:'Project not found.'});if(!(project.visualReviews||[]).some(review=>review.id===reviewId))return send(res,404,{error:'Visual review not found.'});const rootDirectory=path.resolve(dataDirectory,'reviews',id,reviewId);const imagePath=path.resolve(rootDirectory,filename);if(path.dirname(imagePath)!==rootDirectory)return send(res,403,{error:'Forbidden'});try{const image=await readFile(imagePath);res.writeHead(200,{'content-type':'image/png','content-length':image.length,'cache-control':'private, max-age=3600','x-content-type-options':'nosniff','cross-origin-resource-policy':'same-origin'});return res.end(image)}catch(error){if(error.code==='ENOENT')return send(res,404,{error:'Screenshot not found.'});throw error;}}
     const visualReviewMatch=route.match(/^\/api\/projects\/([\w-]+)\/evaluations\/visual-review$/);
     if(visualReviewMatch&&method==='POST'){const [,id]=visualReviewMatch;const input=await body(req);if(input.approved!==true)return send(res,400,{error:'Explicit approval is required before Chrome renders pages from this repository.'});const project=(await projectStore.all()).find(item=>item.id===id);if(!project)return send(res,404,{error:'Project not found.'});const reviewId=randomUUID();const dataRoot=path.resolve(dataDirectory,'reviews',id,reviewId);const result=await visualReviewRunner(project.repositoryPath,dataRoot);const createdAt=new Date().toISOString();const screenshots=result.pages.map(page=>({...page,url:`/api/projects/${id}/reviews/${reviewId}/${page.filename}`}));const review={id:reviewId,createdAt,status:result.status,evidence:result.evidence,screenshots,errors:result.errors};const found=await updateProjects(projectStore,records=>{const current=records.find(item=>item.id===id);if(!current)return false;current.visualReviews??=[];current.visualReviews.unshift(review);current.visualReviews=current.visualReviews.slice(0,20);current.updatedAt=createdAt;current.activity.unshift({at:createdAt,text:`Visual review screenshots captured: ${screenshots.length} page(s)`});return true;});if(!found)return send(res,404,{error:'Project not found.'});return send(res,201,{reviewId,review});}
+    const browserQaMatch = route.match(/^\/api\/projects\/([\w-]+)\/evaluations\/browser-qa$/);
+    if (browserQaMatch && method === 'POST') {
+      const [, id] = browserQaMatch;
+      const input = await body(req);
+      if (input.approved !== true) return send(res, 400, { error: 'Explicit approval is required before running autonomous browser QA against this repository.' });
+      const project = (await projectStore.all()).find(p => p.id === id);
+      if (!project) return send(res, 404, { error: 'Project not found.' });
+      const qaOutput = path.resolve(dataDirectory, 'qa', id);
+      const result = await runBrowserQaSuite({ repositoryPath: project.repositoryPath, outputDirectory: qaOutput });
+      const createdAt = new Date().toISOString();
+      const check = {
+        id: randomUUID(),
+        category: 'testing',
+        title: 'Autonomous Browser QA & Journey Verification',
+        status: result.status,
+        score: result.status === 'pass' ? 100 : 50,
+        evidence: result.evidence,
+        critical: false,
+        verification: 'automated',
+        source: 'browser-qa',
+        provenance: {
+          kind: 'automated',
+          evaluatorId: 'browser-qa',
+          evaluatorVersion: '1.0.0',
+          capturedAt: createdAt,
+          execution: 'playwright-qa'
+        },
+        resultDetails: {
+          routesDiscovered: result.routesDiscovered,
+          criticalJourneys: result.criticalJourneys,
+          bugReports: result.bugReports,
+          artifacts: result.artifacts
+        },
+        createdAt
+      };
+      let quality, recorded;
+      await updateProjects(projectStore, projects => {
+        const current = projects.find(p => p.id === id);
+        if (!current) return false;
+        recorded = recordEvaluation(current, check);
+        current.updatedAt = createdAt;
+        current.activity.unshift({ at: createdAt, text: `Browser QA executed: ${result.status} (${result.bugReports.length} bug report(s))` });
+        quality = evaluateQuality(current.checks, current.type);
+        return true;
+      });
+      return send(res, 201, { check, quality, report: result });
+    }
     const evaluationHistoryMatch=route.match(/^\/api\/projects\/([\w-]+)\/evaluations\/history$/);
     if(evaluationHistoryMatch&&method==='GET'){const project=(await projectStore.all()).find(p=>p.id===evaluationHistoryMatch[1]);return project?send(res,200,project.evaluationHistory||[]):send(res,404,{error:'Project not found.'})}
     const activityMatch=route.match(/^\/api\/projects\/([\w-]+)\/activity$/);
