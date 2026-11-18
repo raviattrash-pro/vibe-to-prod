@@ -1,7 +1,7 @@
 import { randomUUID, createHash } from 'node:crypto';
 
 export function createIdempotencyKey(workflowId, taskIds = []) {
-  const content = `${workflowId}:${[...taskIds].sort().join(',')}`;
+  const content = `${workflowId}:${Array.from(taskIds).toSorted().join(',')}`;
   return createHash('sha256').update(content).digest('hex').slice(0, 32);
 }
 
